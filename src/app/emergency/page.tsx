@@ -48,7 +48,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useRole } from "@/lib/role-context";
-import { EmergencyCase, Ambulance, Doctor, VitalSign } from "@/types";
+import { EmergencyCase, Ambulance as AmbulanceType, Doctor, VitalSign } from "@/types";
 
 type EmergencyStatus = "Incoming" | "In Treatment" | "Discharged" | "Admitted" | "Transferred";
 type EmergencyLevel = "Critical" | "Serious" | "Minor";
@@ -62,7 +62,7 @@ interface ExtendedEmergencyCase extends EmergencyCase {
 export default function EmergencyPage() {
   const { currentRole } = useRole();
   const [emergencyCases, setEmergencyCases] = useState<ExtendedEmergencyCase[]>([]);
-  const [ambulances, setAmbulances] = useState<Ambulance[]>([]);
+  const [ambulances, setAmbulances] = useState<AmbulanceType[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -75,7 +75,7 @@ export default function EmergencyPage() {
   const [isDispatchOpen, setIsDispatchOpen] = useState(false);
   const [isActionOpen, setIsActionOpen] = useState(false);
   const [selectedCase, setSelectedCase] = useState<ExtendedEmergencyCase | null>(null);
-  const [selectedAmbulance, setSelectedAmbulance] = useState<Ambulance | null>(null);
+  const [selectedAmbulance, setSelectedAmbulance] = useState<AmbulanceType | null>(null);
   const [actionType, setActionType] = useState<string>("");
 
   // Form states
