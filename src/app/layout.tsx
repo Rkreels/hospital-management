@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
-import { Toaster } from "sonner";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import { RoleProvider } from "@/lib/role-context";
+import { Toaster } from "sonner";
+
+const inter = Inter({ 
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "HospitalHub - Hospital Management System",
-  description: "Comprehensive hospital management system for patient care, appointments, billing, and more.",
+  description: "Comprehensive hospital management simulation and learning platform",
 };
 
 export default function RootLayout({
@@ -14,9 +21,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
-        {children}
-        <Toaster position="bottom-right" />
+      <body className={`${inter.variable} font-sans antialiased`}>
+        <RoleProvider>
+          {children}
+        </RoleProvider>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );
