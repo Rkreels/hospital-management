@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/store';
 
-// Simple in-memory file storage for simulation
-const fileStore: Map<string, { buffer: Buffer; filename: string; mimetype: string }> = new Map();
+// Initialize global fileStore if not exists
+declare global {
+  // eslint-disable-next-line no-var
+  var documentFileStore: Map<string, { buffer: Buffer; filename: string; mimetype: string }> | undefined;
+}
+
+// Get or create the global file store
+function getFileStore(): Map<string, { buffer: Buffer; filename: string; mimetype: string }> {
+  if (!globalThis.documentFileStore) {
+    globalThis.documentFileStore = new Map();
+  }
+  return globalThis.documentFileStore;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -56,6 +67,7 @@ export async function POST(request: NextRequest) {
     const fileId = `DOC-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     // Store file in memory
+    const fileStore = getFileStore();
     fileStore.set(fileId, {
       buffer,
       filename: file.name,
@@ -120,6 +132,3 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to delete document' }, { status: 500 });
   }
 }
-
-// Export fileStore for download endpoint
-export { fileStore };

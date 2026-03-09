@@ -385,5 +385,39 @@ export function useRole() {
   return context;
 }
 
+// Simple permission hook for checking specific permissions
+export function usePermission(_module: string, action: string): boolean {
+  const { hasPermission, permissions } = useRole();
+  
+  // Map module/action to permission keys
+  const permissionMap: Record<string, keyof RolePermissions> = {
+    'operating-room_edit': 'canManageSurgery',
+    'operating-room_create': 'canManageSurgery',
+    'reports_export': 'canGenerateReports',
+    'staff_edit': 'canManageUsers',
+    'staff_delete': 'canManageUsers',
+    'staff_create': 'canManageUsers',
+  };
+  
+  const key = permissionMap[`${_module}_${action}`];
+  if (key) {
+    return hasPermission(key);
+  }
+  
+  // Fallback: check if action matches any permission key
+  const actionToPermission: Record<string, keyof RolePermissions> = {
+    edit: 'canEditPatients',
+    delete: 'canDeletePatients',
+    create: 'canCreateAppointments',
+    export: 'canGenerateReports',
+  };
+  
+  if (actionToPermission[action]) {
+    return permissions[actionToPermission[action]];
+  }
+  
+  return false;
+}
+
 export { ROLE_PERMISSIONS, DEFAULT_USERS };
 export type { RoleContextType };

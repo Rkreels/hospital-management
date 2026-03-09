@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getStore } from '@/lib/store';
+import { db } from '@/lib/store';
 import { DashboardStats } from '@/types';
 
 // Helper function to parse date range
@@ -41,18 +41,17 @@ export async function GET(request: NextRequest) {
     const departmentId = searchParams.get('departmentId');
     
     const dateRange = parseDateRange(startDate || undefined, endDate || undefined);
-    const store = getStore();
     
     switch (reportType) {
       case 'patient-census': {
-        let patients = store.patients;
+        let patients = db.getPatients();
         
         // Apply date filter
         patients = filterByDateRange(patients, dateRange, 'admittedDate');
         
         // Apply department filter if provided
         if (departmentId) {
-          const dept = store.departments.find(d => d.id === departmentId);
+          const dept = db.getDepartment(departmentId);
           if (dept) {
             patients = patients.filter(p => p.ward === dept.name);
           }
@@ -62,19 +61,19 @@ export async function GET(request: NextRequest) {
       }
       
       case 'revenue': {
-        let invoices = store.invoices;
+        let invoices = db.getInvoices();
         invoices = filterByDateRange(invoices, dateRange, 'date');
         return NextResponse.json(invoices);
       }
       
       case 'lab-statistics': {
-        let labOrders = store.labOrders;
+        let labOrders = db.getLabOrders();
         labOrders = filterByDateRange(labOrders, dateRange, 'orderedAt');
         return NextResponse.json(labOrders);
       }
       
       case 'occupancy': {
-        let departments = store.departments;
+        let departments = db.getDepartments();
         
         // Filter by department if provided
         if (departmentId) {
@@ -85,38 +84,51 @@ export async function GET(request: NextRequest) {
       }
       
       case 'dashboard': {
+        const patients = db.getPatients();
+        const appointments = db.getAppointments();
+        const doctors = db.getDoctors();
+        const nurses = db.getNurses();
+        const labOrders = db.getLabOrders();
+        const emergencyCases = db.getEmergencyCases();
+        const departments = db.getDepartments();
+        const invoices = db.getInvoices();
+        const prescriptions = db.getPrescriptions();
+        const medications = db.getMedications();
+        const surgeries = db.getSurgeries();
+        const tasks = db.getTasks();
+        
         const stats: DashboardStats = {
-          totalPatients: store.patients.length,
-          inpatients: store.patients.filter(p => p.status !== 'Outpatient' && p.status !== 'Discharged').length,
-          outpatients: store.patients.filter(p => p.status === 'Outpatient').length,
-          criticalPatients: store.patients.filter(p => p.status === 'Critical').length,
-          todayAppointments: store.appointments.filter(a => {
+          totalPatients: patients.length,
+          inpatients: patients.filter(p => p.status !== 'Outpatient' && p.status !== 'Discharged').length,
+          outpatients: patients.filter(p => p.status === 'Outpatient').length,
+          criticalPatients: patients.filter(p => p.status === 'Critical').length,
+          todayAppointments: appointments.filter(a => {
             const today = new Date().toDateString();
             return new Date(a.date).toDateString() === today;
           }).length,
-          completedAppointments: store.appointments.filter(a => a.status === 'Completed').length,
-          cancelledAppointments: store.appointments.filter(a => a.status === 'Cancelled').length,
-          availableDoctors: store.doctors.filter(d => d.status === 'Available').length,
-          onDutyNurses: store.nurses.filter(n => n.status === 'Available' || n.status === 'On Call').length,
-          pendingLabResults: store.labOrders.filter(l => l.status !== 'Completed' && l.status !== 'Cancelled').length,
-          emergencyCases: store.emergencyCases.filter(e => e.status === 'Incoming' || e.status === 'In Treatment').length,
-          activeEmergencies: store.emergencyCases.filter(e => e.status === 'In Treatment').length,
+          completedAppointments: appointments.filter(a => a.status === 'Completed').length,
+          cancelledAppointments: appointments.filter(a => a.status === 'Cancelled').length,
+          availableDoctors: doctors.filter(d => d.status === 'Available').length,
+          onDutyNurses: nurses.filter(n => n.status === 'Available' || n.status === 'On Call').length,
+          pendingLabResults: labOrders.filter(l => l.status !== 'Completed' && l.status !== 'Cancelled').length,
+          emergencyCases: emergencyCases.filter(e => e.status === 'Incoming' || e.status === 'In Treatment').length,
+          activeEmergencies: emergencyCases.filter(e => e.status === 'In Treatment').length,
           bedOccupancy: Math.round(
-            (store.departments.reduce((sum, d) => sum + d.occupiedBeds, 0) /
-              store.departments.reduce((sum, d) => sum + d.beds, 0)) * 100
+            (departments.reduce((sum, d) => sum + d.occupiedBeds, 0) /
+              departments.reduce((sum, d) => sum + d.beds, 0)) * 100
           ),
-          totalBeds: store.departments.reduce((sum, d) => sum + d.beds, 0),
-          occupiedBeds: store.departments.reduce((sum, d) => sum + d.occupiedBeds, 0),
-          availableBeds: store.departments.reduce((sum, d) => sum + d.beds - d.occupiedBeds, 0),
-          pendingInvoices: store.invoices.filter(i => i.status === 'Pending' || i.status === 'Overdue').length,
-          totalRevenue: store.invoices.filter(i => i.status === 'Paid').reduce((sum, i) => sum + i.total, 0),
-          outstandingAmount: store.invoices.filter(i => i.status !== 'Paid' && i.status !== 'Cancelled')
+          totalBeds: departments.reduce((sum, d) => sum + d.beds, 0),
+          occupiedBeds: departments.reduce((sum, d) => sum + d.occupiedBeds, 0),
+          availableBeds: departments.reduce((sum, d) => sum + d.beds - d.occupiedBeds, 0),
+          pendingInvoices: invoices.filter(i => i.status === 'Pending' || i.status === 'Overdue').length,
+          totalRevenue: invoices.filter(i => i.status === 'Paid').reduce((sum, i) => sum + i.total, 0),
+          outstandingAmount: invoices.filter(i => i.status !== 'Paid' && i.status !== 'Cancelled')
             .reduce((sum, i) => sum + i.balance, 0),
-          pendingPrescriptions: store.prescriptions.filter(p => p.status === 'Pending').length,
-          lowStockMedications: store.medications.filter(m => m.stock < m.reorderLevel).length,
-          scheduledSurgeries: store.surgeries?.filter(s => s.status === 'Scheduled').length || 0,
-          pendingTasks: store.tasks.filter(t => t.status === 'To Do' || t.status === 'In Progress').length,
-          occupancyByDepartment: store.departments.map(d => ({
+          pendingPrescriptions: prescriptions.filter(p => p.status === 'Pending').length,
+          lowStockMedications: medications.filter(m => m.stock < m.reorderLevel).length,
+          scheduledSurgeries: surgeries?.filter(s => s.status === 'Scheduled').length || 0,
+          pendingTasks: tasks.filter(t => t.status === 'To Do' || t.status === 'In Progress').length,
+          occupancyByDepartment: departments.map(d => ({
             name: d.name,
             occupancy: Math.round((d.occupiedBeds / d.beds) * 100),
           })),
@@ -127,8 +139,8 @@ export async function GET(request: NextRequest) {
         
         return NextResponse.json({
           stats,
-          departments: store.departments,
-          medications: store.medications,
+          departments,
+          medications,
         });
       }
       
@@ -138,7 +150,7 @@ export async function GET(request: NextRequest) {
           return NextResponse.json({ error: 'Patient ID required' }, { status: 400 });
         }
         
-        const patient = store.patients.find(p => p.id === patientId);
+        const patient = db.getPatient(patientId);
         if (!patient) {
           return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
         }
@@ -152,7 +164,7 @@ export async function GET(request: NextRequest) {
           return NextResponse.json({ error: 'Invoice ID required' }, { status: 400 });
         }
         
-        const invoice = store.invoices.find(i => i.id === invoiceId);
+        const invoice = db.getInvoice(invoiceId);
         if (!invoice) {
           return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
         }
@@ -166,7 +178,7 @@ export async function GET(request: NextRequest) {
           return NextResponse.json({ error: 'Lab Order ID required' }, { status: 400 });
         }
         
-        const labOrder = store.labOrders.find(l => l.id === labId);
+        const labOrder = db.getLabOrder(labId);
         if (!labOrder) {
           return NextResponse.json({ error: 'Lab order not found' }, { status: 404 });
         }
@@ -178,13 +190,13 @@ export async function GET(request: NextRequest) {
         // Return all report types and counts
         return NextResponse.json({
           reportTypes: [
-            { id: 'patient-census', name: 'Patient Census', count: store.patients.length },
-            { id: 'revenue', name: 'Revenue Report', count: store.invoices.length },
-            { id: 'lab-statistics', name: 'Lab Statistics', count: store.labOrders.length },
-            { id: 'occupancy', name: 'Bed Occupancy', count: store.departments.length },
+            { id: 'patient-census', name: 'Patient Census', count: db.getPatients().length },
+            { id: 'revenue', name: 'Revenue Report', count: db.getInvoices().length },
+            { id: 'lab-statistics', name: 'Lab Statistics', count: db.getLabOrders().length },
+            { id: 'occupancy', name: 'Bed Occupancy', count: db.getDepartments().length },
             { id: 'dashboard', name: 'Dashboard Overview', count: 1 },
           ],
-          departments: store.departments.map(d => ({ id: d.id, name: d.name })),
+          departments: db.getDepartments().map(d => ({ id: d.id, name: d.name })),
         });
     }
   } catch (error) {
