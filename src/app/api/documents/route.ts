@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/store';
+import { Document } from '@/types';
 
 // Initialize global fileStore if not exists
 declare global {
-  // eslint-disable-next-line no-var
   var documentFileStore: Map<string, { buffer: Buffer; filename: string; mimetype: string }> | undefined;
 }
 
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     const document = db.addDocument({
       name: file.name,
       type,
-      category: category || 'Other',
+      category: (category as Document['category']) || 'Other',
       size: file.size,
       mimeType: file.type,
       url: `/api/documents/download?id=${fileId}`,
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       uploadedBy: uploadedBy || 'System',
       uploadedById: uploadedById || 'system',
       tags: tags ? tags.split(',').map(t => t.trim()) : [],
-      accessLevel: accessLevel || 'Internal',
+      accessLevel: (accessLevel as Document['accessLevel']) || 'Internal',
       notes: notes || undefined,
     });
     

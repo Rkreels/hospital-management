@@ -16,7 +16,6 @@ interface UseNotificationsReturn {
 
 // WebSocket URL - uses XTransformPort for port transformation in dev environment
 const WS_URL = '/?XTransformPort=3002';
-const HTTP_BROADCAST_URL = 'http://localhost:3003/broadcast';
 
 export function useNotifications(
   role?: UserRole,

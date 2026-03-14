@@ -80,6 +80,9 @@ const priorityColors: Record<Priority, string> = {
   High: "bg-orange-500 text-white",
   Normal: "bg-blue-500 text-white",
   Low: "bg-gray-500 text-white",
+  Urgent: "bg-yellow-500 text-white",
+  Routine: "bg-green-500 text-white",
+  STAT: "bg-purple-500 text-white",
 };
 
 const flagColors: Record<string, string> = {
@@ -121,7 +124,15 @@ export default function LabResultsPage() {
   });
   
   // Results entry
-  const [testResults, setTestResults] = useState<LabResult[]>([]);
+  const [testResults, setTestResults] = useState<{
+    id: string;
+    parameter: string;
+    value: string;
+    unit: string;
+    flag: string;
+    referenceMin?: number;
+    referenceMax?: number;
+  }[]>([]);
   const [selectedTestForResults, setSelectedTestForResults] = useState<LabOrderTest | null>(null);
 
   // Statistics
@@ -167,7 +178,7 @@ export default function LabResultsPage() {
         ).length;
         const criticalResults = ordersData.filter((o: LabOrder) => 
           o.tests?.some((t: LabOrderTest) => 
-            t.results?.some((r: LabResult) => 
+            t.results?.some((r: { flag?: string }) => 
               r.flag?.includes("Critical")
             )
           )
@@ -200,7 +211,7 @@ export default function LabResultsPage() {
         completedToday: data.filter((o: LabOrder) => o.status === "Completed" && o.reportReadyAt?.split("T")[0] === today).length,
         criticalResults: data.filter((o: LabOrder) => 
           o.tests?.some((t: LabOrderTest) => 
-            t.results?.some((r: LabResult) => r.flag?.includes("Critical"))
+            t.results?.some((r: { flag?: string }) => r.flag?.includes("Critical"))
           )
         ).length,
       });
@@ -304,10 +315,10 @@ export default function LabResultsPage() {
     if (refRange.maxCritical !== undefined && value > refRange.maxCritical) {
       return "Critical High";
     }
-    if (value < refRange.minNormal) {
+    if (refRange.minNormal !== undefined && value < refRange.minNormal) {
       return "Low";
     }
-    if (value > refRange.maxNormal) {
+    if (refRange.maxNormal !== undefined && value > refRange.maxNormal) {
       return "High";
     }
     return "Normal";
@@ -727,7 +738,7 @@ export default function LabResultsPage() {
                                 </span>
                               </td>
                               <td className="px-6 py-4 text-muted-foreground">
-                                {new Date(order.createdAt).toLocaleDateString()}
+                                {new Date(order.createdAt || new Date().toISOString()).toLocaleDateString()}
                               </td>
                               <td className="px-6 py-4 text-right">
                                 <DropdownMenu>
@@ -841,7 +852,7 @@ export default function LabResultsPage() {
                                 <div>
                                   <p className="font-medium">{order.patientName}</p>
                                   <p className="text-sm text-muted-foreground">
-                                    {order.orderNumber} • {new Date(order.createdAt).toLocaleDateString()}
+                                    {order.orderNumber} • {new Date(order.createdAt || new Date().toISOString()).toLocaleDateString()}
                                   </p>
                                 </div>
                                 {hasCriticalResults(order) && (
@@ -1172,7 +1183,7 @@ export default function LabResultsPage() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Created</p>
-                    <p className="font-medium">{new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                    <p className="font-medium">{new Date(selectedOrder.createdAt || new Date().toISOString()).toLocaleString()}</p>
                   </div>
                 </div>
 
@@ -1356,7 +1367,7 @@ export default function LabResultsPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {selectedTest.referenceRanges.map((range, index) => (
+                        {selectedTest.referenceRanges?.map((range, index) => (
                           <tr key={index} className="border-t">
                             <td className="px-4 py-2 font-medium">{range.parameter}</td>
                             <td className="px-4 py-2">{range.unit}</td>

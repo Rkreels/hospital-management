@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, Search, Upload, File, FileImage, FileSpreadsheet, FilePlus, Download, Eye } from "lucide-react";
+import { FileText, Search, Upload, File, FileImage, FileSpreadsheet, Download, Eye } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

@@ -712,7 +712,7 @@ export const db = {
   getDocuments: (): Document[] => [...getData().documents],
   getDocument: (id: string): Document | undefined => getData().documents.find(d => d.id === id),
   getDocumentsByPatient: (patientId: string): Document[] => getData().documents.filter(d => d.patientId === patientId),
-  addDocument: (document: Omit<Document, 'id'>): Document => {
+  addDocument: (document: Omit<Document, 'id' | 'uploadedAt' | 'version'>): Document => {
     const data = getData();
     const newDocument = { 
       ...document, 
@@ -755,7 +755,7 @@ export const db = {
     }
     return false;
   },
-  addNotification: (notification: Omit<Notification, 'id'>): Notification => {
+  addNotification: (notification: Omit<Notification, 'id' | 'createdAt'>): Notification => {
     const data = getData();
     const newNotification = { 
       ...notification, 

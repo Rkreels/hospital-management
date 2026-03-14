@@ -4,9 +4,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, Plus, MoreVertical, Eye, Edit, Trash2, Users, UserCheck,
-  UserX, Building2, Calendar, Clock, Phone, Mail, Award, FileText,
-  Filter, Download, ChevronDown, ChevronUp, X, Check, AlertCircle,
-  Briefcase, GraduationCap, BookOpen, CalendarDays, CheckCircle, XCircle
+  UserX, Building2, Calendar, Clock, Award, Download, X, Check, AlertCircle,
+  Briefcase, GraduationCap, CalendarDays
 } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";

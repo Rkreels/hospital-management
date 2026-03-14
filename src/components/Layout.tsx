@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Calendar as CalendarIcon,
-  FileText,
   Users,
   Bell,
   Search,
@@ -19,7 +18,6 @@ import {
   Pill,
   FlaskConical,
   ClipboardList,
-  UserCheck,
   Plus,
   Building,
   Briefcase,
@@ -27,7 +25,6 @@ import {
   BarChart3,
   Stethoscope,
   HeartPulse,
-  LogOut,
   ChevronDown,
   Wifi,
   WifiOff,
@@ -45,7 +42,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { useRole, ROLE_PERMISSIONS } from "@/lib/role-context";
+import { useRole } from "@/lib/role-context";
 import { UserRole } from "@/types";
 import { useNotifications } from "@/hooks/useNotifications";
 import { NotificationPanel } from "@/components/NotificationPanel";

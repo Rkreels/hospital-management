@@ -18,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Upload,
@@ -29,7 +28,6 @@ import {
   Film,
   Music,
   X,
-  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 

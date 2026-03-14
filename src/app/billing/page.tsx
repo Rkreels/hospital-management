@@ -4,13 +4,12 @@ import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, Plus, MoreVertical, Eye, Edit, Trash2, DollarSign,
-  CreditCard, FileText, Download, Filter, TrendingUp, TrendingDown,
-  AlertCircle, CheckCircle, Clock, Building2, Calendar, ChevronDown,
-  ChevronUp, Receipt, Banknote, Wallet, Shield, X, Check
+  CreditCard, FileText, Download, AlertCircle, CheckCircle, Clock,
+  Calendar, Receipt, Wallet, Shield, X, Check
 } from "lucide-react";
 import Layout from "@/components/Layout";
 import PaymentDialog from "@/components/PaymentDialog";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,10 +36,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { useRole } from "@/lib/role-context";
 import { toast } from "sonner";
-import PaymentDialog from "@/components/PaymentDialog";
 
 // Types
 interface InvoiceService {
@@ -642,9 +639,9 @@ export default function BillingPage() {
     }
   };
 
-  const canEdit = currentRole === 'admin' || currentRole === 'finance_manager' || currentRole === 'receptionist';
-  const canDelete = currentRole === 'admin' || currentRole === 'finance_manager';
-  const canApprove = currentRole === 'admin' || currentRole === 'finance_manager';
+  const canEdit = currentRole === 'admin' || currentRole === 'billing' || currentRole === 'receptionist';
+  const canDelete = currentRole === 'admin' || currentRole === 'billing';
+  const canApprove = currentRole === 'admin' || currentRole === 'billing';
 
   // Calculate max height for chart bars
   const maxRevenue = Math.max(...revenueData.map(d => d.revenue));

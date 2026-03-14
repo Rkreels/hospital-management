@@ -38,13 +38,9 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Clock,
-  ChevronDown,
   BarChart3,
-  PieChart as PieChartIcon,
-  LineChart,
-  Table,
+  PieChart,
   RefreshCw,
-  X,
   Check,
   AlertTriangle,
   Send,
@@ -53,7 +49,6 @@ import {
   FileText,
   Eye,
   Building2,
-  Stethoscope,
 } from "lucide-react";
 import { toast } from "sonner";
 

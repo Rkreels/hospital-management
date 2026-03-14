@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Declare global fileStore
 declare global {
-  // eslint-disable-next-line no-var
   var documentFileStore: Map<string, { buffer: Buffer; filename: string; mimetype: string }> | undefined;
 }
 

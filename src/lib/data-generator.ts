@@ -20,8 +20,6 @@ import {
   Bed,
   Surgery,
   InventoryItem,
-  InsuranceClaim,
-  UserRole,
   Allergy,
   MedicalHistoryEntry,
   SurgeryHistory,
@@ -729,7 +727,6 @@ export function generateAppointments(patients: Patient[], doctors: Doctor[]): Ap
 
 export function generateMedications(): Medication[] {
   const medications: Medication[] = [];
-  const statuses: Medication['status'][] = ['In Stock', 'Low Stock', 'Out of Stock', 'Expired', 'Discontinued'];
   const controlledLevels: Medication['controlledLevel'][] = ['Schedule II', 'Schedule III', 'Schedule IV', 'Schedule V'];
   
   MEDICATION_NAMES.forEach((med, i) => {

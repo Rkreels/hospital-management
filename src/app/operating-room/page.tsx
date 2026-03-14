@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Layout from "@/components/Layout";
-import { useRole, usePermission } from "@/lib/role-context";
+import { usePermission } from "@/lib/role-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { 
   Scissors, Clock, Users, AlertTriangle, CheckCircle2, Activity, 
   Calendar, User, Building2, Plus, ChevronRight, Play,
-  CheckSquare, Square, Timer, Stethoscope, Heart, XCircle,
+  CheckSquare, Square, Timer, Stethoscope, Heart,
   Sparkles, Zap, Ban, DoorOpen
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,18 +22,6 @@ import { OperatingRoom, Surgery, Patient, Doctor, ChecklistItem } from "@/types"
 // Surgery status workflow
 const SURGERY_STATUS_FLOW = ['Scheduled', 'Pre-Op', 'In Progress', 'Closing', 'Completed'] as const;
 const ANESTHESIA_TYPES = ['General', 'Local', 'Regional', 'Sedation'] as const;
-
-// Pre-op checklist default items
-const DEFAULT_PREOP_CHECKLIST: Omit<ChecklistItem, 'id'>[] = [
-  { item: 'Patient identity verified', category: 'Pre-Op', isCompleted: false },
-  { item: 'Consent form signed', category: 'Pre-Op', isCompleted: false },
-  { item: 'Allergies checked', category: 'Pre-Op', isCompleted: false },
-  { item: 'Surgical site marked', category: 'Pre-Op', isCompleted: false },
-  { item: 'Time out completed', category: 'Time Out', isCompleted: false },
-  { item: 'Anesthesia safety check', category: 'Time Out', isCompleted: false },
-  { item: 'Instrument count verified', category: 'Sign Out', isCompleted: false },
-  { item: 'Specimen labeled', category: 'Sign Out', isCompleted: false },
-];
 
 // Common procedures
 const COMMON_PROCEDURES = [
@@ -52,7 +40,6 @@ export default function OperatingRoomPage() {
 }
 
 function OperatingRoomContent() {
-  const { currentRole } = useRole();
   const canEdit = usePermission('operating-room', 'edit');
   const canCreate = usePermission('operating-room', 'create');
   
@@ -508,7 +495,7 @@ function OperatingRoomContent() {
                       {(() => {
                         const nextSurgery = surgeries
                           .filter(s => s.operatingRoomId === room.id && (s.status === 'Scheduled' || s.status === 'Pre-Op'))
-                          .sort((a, b) => a.scheduledStartTime.localeCompare(b.scheduledStartTime))[0];
+                          .sort((a, b) => (a.scheduledStartTime || '').localeCompare(b.scheduledStartTime || ''))[0];
                         return nextSurgery ? (
                           <motion.div 
                             initial={{ opacity: 0, scale: 0.95 }}
@@ -537,9 +524,9 @@ function OperatingRoomContent() {
                               {eq}
                             </Badge>
                           ))}
-                          {room.equipment?.length > 3 && (
+                          {(room.equipment?.length || 0) > 3 && (
                             <Badge variant="outline" className="text-xs">
-                              +{room.equipment.length - 3} more
+                              +{(room.equipment?.length || 0) - 3} more
                             </Badge>
                           )}
                         </div>
@@ -750,11 +737,11 @@ function OperatingRoomContent() {
                     <p className="text-muted-foreground">No surgeries scheduled for today</p>
                   </div>
                 ) : (
-                  <div className="relative">
+                    <div className="relative">
                     {/* Timeline */}
                     <div className="space-y-4">
                       {surgeries
-                        .sort((a, b) => a.scheduledStartTime.localeCompare(b.scheduledStartTime))
+                        .sort((a, b) => (a.scheduledStartTime || '').localeCompare(b.scheduledStartTime || ''))
                         .map((surgery, index) => (
                           <div key={surgery.id} className="flex gap-4">
                             {/* Time marker */}
@@ -1160,7 +1147,7 @@ function OperatingRoomContent() {
                       value={selectedSurgery.status}
                       onValueChange={(value) => {
                         handleStatusChange(selectedSurgery.id, value);
-                        setSelectedSurgery({ ...selectedSurgery, status: value });
+                        setSelectedSurgery({ ...selectedSurgery, status: value as 'Scheduled' | 'Pre-Op' | 'In Progress' | 'Closing' | 'Completed' | 'Cancelled' | 'Postponed' });
                       }}
                     >
                       <SelectTrigger>

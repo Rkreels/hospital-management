@@ -48,7 +48,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useRole } from "@/lib/role-context";
-import { EmergencyCase, Ambulance as AmbulanceType, Doctor, VitalSign } from "@/types";
+import { EmergencyCase, Ambulance as AmbulanceType, Doctor, VitalSigns, VitalSign } from "@/types";
 
 type EmergencyStatus = "Incoming" | "In Treatment" | "Discharged" | "Admitted" | "Transferred";
 type EmergencyLevel = "Critical" | "Serious" | "Minor";
@@ -124,7 +124,7 @@ export default function EmergencyPage() {
       // Add calculated waiting time
       const enhancedEmergencies = emergenciesData.map((e: ExtendedEmergencyCase) => ({
         ...e,
-        waitingTime: calculateWaitingTime(e.createdAt),
+        waitingTime: calculateWaitingTime(e.createdAt || new Date().toISOString()),
         lastUpdated: new Date().toLocaleTimeString(),
       }));
 

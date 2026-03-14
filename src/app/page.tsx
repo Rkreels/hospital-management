@@ -13,10 +13,8 @@ import {
   CreditCard,
   ArrowRight,
   TrendingUp,
-  TrendingDown,
   Activity,
   Pill,
-  Clock,
   Building,
   ClipboardList,
   UserCheck,
@@ -24,7 +22,6 @@ import {
   DollarSign,
   BarChart3,
   PieChart,
-  LineChart,
   RefreshCw,
 } from "lucide-react";
 import Layout from "@/components/Layout";

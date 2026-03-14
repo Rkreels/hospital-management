@@ -58,6 +58,21 @@ export interface VitalSigns {
   recordedBy: string;
 }
 
+export interface VitalSign {
+  id: string;
+  bloodPressureSystolic: number;
+  bloodPressureDiastolic: number;
+  heartRate: number;
+  temperature: number;
+  respiratoryRate: number;
+  oxygenSaturation: number;
+  weight: number;
+  painLevel?: number;
+  notes?: string;
+  recordedAt: string;
+  recordedBy: string;
+}
+
 export interface Allergy {
   id: string;
   substance: string;
@@ -449,21 +464,26 @@ export interface LabTest {
   categoryId: string;
   description: string;
   specimenType: string;
+  sampleType?: string;
+  preparations?: string[];
   preparationInstructions?: string;
   price: number;
   turnaroundTime: number;
   referenceRangeLow: number;
   referenceRangeHigh: number;
   referenceRangeUnit: string;
+  referenceRanges?: { parameter: string; min: number; max: number; unit: string; minNormal?: number; maxNormal?: number; minCritical?: number; maxCritical?: number }[];
   criticalLow?: number;
   criticalHigh?: number;
   status: 'Active' | 'Inactive';
+  department?: string;
 }
 
 export interface LabOrderTest {
   id: string;
   testId: string;
   testName: string;
+  testCode?: string;
   status: 'Pending' | 'In Progress' | 'Completed' | 'Cancelled';
   result?: string;
   numericResult?: number;
@@ -471,6 +491,7 @@ export interface LabOrderTest {
   isAbnormal?: boolean;
   isCritical?: boolean;
   referenceRange?: string;
+  results?: { id?: string; parameter?: string; value?: string; unit?: string; referenceMin?: number; referenceMax?: number; flag?: string }[];
   notes?: string;
   performedBy?: string;
   verifiedBy?: string;
@@ -482,14 +503,18 @@ export interface LabOrder {
   orderNumber: string;
   patientId: string;
   patientName: string;
+  patientAge?: number;
+  patientGender?: string;
   doctorId: string;
   doctorName: string;
   tests: LabOrderTest[];
   priority: 'Routine' | 'Urgent' | 'STAT';
   status: 'Ordered' | 'Sample Collected' | 'In Progress' | 'Completed' | 'Cancelled';
   orderedAt: string;
+  createdAt?: string;
   collectedAt?: string;
   completedAt?: string;
+  reportReadyAt?: string;
   collectedBy?: string;
   notes?: string;
   diagnosis?: string;
@@ -510,10 +535,30 @@ export interface LabResult {
   tests: LabOrderTest[];
   status: 'Preliminary' | 'Final' | 'Corrected' | 'Cancelled';
   reportedAt: string;
+  value?: string;
+  flag?: string;
+  parameter?: string;
+  referenceMin?: number;
+  referenceMax?: number;
+  unit?: string;
   verifiedBy?: string;
   verifiedAt?: string;
   notes?: string;
   interpretation?: string;
+}
+
+export type Priority = 'Critical' | 'High' | 'Normal' | 'Low' | 'Routine' | 'Urgent' | 'STAT';
+export type LabOrderStatus = 'Ordered' | 'Sample Collected' | 'In Progress' | 'Completed' | 'Cancelled';
+
+export interface ReferenceRange {
+  parameter?: string;
+  minNormal?: number;
+  maxNormal?: number;
+  minCritical?: number;
+  maxCritical?: number;
+  min?: number;
+  max?: number;
+  unit?: string;
 }
 
 // ============ BILLING ============
@@ -611,10 +656,15 @@ export interface EmergencyCase {
   caseNumber: string;
   patientName?: string;
   patientId?: string;
+  patientAge?: number;
+  patientGender?: string;
+  patientPhone?: string;
   case: string;
   description: string;
   eta: string;
   arrivalTime?: string;
+  arrivalMode?: string;
+  arrivalDate?: string;
   level: 'Critical' | 'Serious' | 'Moderate' | 'Minor';
   triageScore?: number;
   status: 'Incoming' | 'Triage' | 'In Treatment' | 'Observation' | 'Discharged' | 'Admitted' | 'Transferred' | 'Deceased';
@@ -624,7 +674,7 @@ export interface EmergencyCase {
   bedNumber?: string;
   treatmentArea?: string;
   chiefComplaint: string;
-  vitalSigns?: VitalSigns;
+  vitalSigns?: VitalSign[];
   allergies?: string[];
   currentMedications?: string[];
   treatments: EmergencyTreatment[];
@@ -634,6 +684,7 @@ export interface EmergencyCase {
   bystanderName?: string;
   bystanderPhone?: string;
   notes?: string;
+  createdAt?: string;
 }
 
 export interface EmergencyTreatment {
@@ -644,6 +695,23 @@ export interface EmergencyTreatment {
   notes?: string;
 }
 
+export interface Ambulance {
+  id: string;
+  vehicleNumber: string;
+  licensePlate: string;
+  driverName: string;
+  driverPhone: string;
+  status: 'Available' | 'Dispatched' | 'On Call' | 'Maintenance' | 'Out of Service';
+  type?: string;
+  currentLocation?: string;
+  destination?: string;
+  eta?: string;
+  patientName?: string;
+  assignedAt?: string;
+  estimatedReturn?: string;
+  paramedicName?: string;
+}
+
 // ============ SURGERY ============
 export interface SurgeryTheater {
   id: string;
@@ -652,8 +720,12 @@ export interface SurgeryTheater {
   department: string;
   status: 'Available' | 'In Use' | 'Cleaning' | 'Maintenance' | 'Reserved';
   features: string[];
+  equipment?: string[];
+  capacity?: number;
   currentSurgeryId?: string;
 }
+
+export type OperatingRoom = SurgeryTheater;
 
 export interface SurgeryTeam {
   surgeonId: string;
@@ -664,10 +736,14 @@ export interface SurgeryTeam {
 export interface PreOpChecklistItem {
   id: string;
   item: string;
+  category?: string;
   completed: boolean;
+  isCompleted?: boolean;
   completedBy?: string;
   completedAt?: string;
 }
+
+export type ChecklistItem = PreOpChecklistItem;
 
 export interface Surgery {
   id: string;
@@ -678,16 +754,26 @@ export interface Surgery {
   procedureCode: string;
   department: string;
   theaterId: string;
+  operatingRoomId?: string;
+  operatingRoomName?: string;
   theaterName: string;
   scheduledDate: string;
   scheduledTime: string;
+  scheduledStartTime?: string;
+  scheduledEndTime?: string;
+  actualStartTime?: string;
+  actualEndTime?: string;
+  surgeonName?: string;
+  anesthesiologistName?: string;
+  assistantSurgeons?: string[];
   estimatedDuration: number;
   actualDuration?: number;
-  status: 'Scheduled' | 'Pre-Op' | 'In Progress' | 'Completed' | 'Cancelled' | 'Postponed';
+  status: 'Scheduled' | 'Pre-Op' | 'In Progress' | 'Closing' | 'Completed' | 'Cancelled' | 'Postponed';
   team: SurgeryTeam[];
   anesthesiaType: 'General' | 'Regional' | 'Local' | 'MAC' | 'None';
   preOpDiagnosis: string;
   postOpDiagnosis?: string;
+  postOpNotes?: string;
   complications?: string;
   bloodLoss?: number;
   specimens?: string[];
