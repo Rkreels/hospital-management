@@ -121,10 +121,10 @@ export default function SurgeriesPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const surgeriesData = db.getSurgeries();
-        const theatersData = db.getSurgeryTheaters();
-        const patientsData = db.getPatients();
-        const doctorsData = db.getDoctors();
+        const surgeriesData = db.getSurgeries() || [];
+        const theatersData = db.getSurgeryTheaters() || [];
+        const patientsData = db.getPatients() || [];
+        const doctorsData = db.getDoctors() || [];
 
         setSurgeries(Array.isArray(surgeriesData) ? surgeriesData : []);
         setTheaters(Array.isArray(theatersData) ? theatersData : []);
@@ -1065,7 +1065,7 @@ export default function SurgeriesPage() {
                       >
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                           <span className="text-xs font-medium text-primary">
-                            {member.surgeonName.charAt(0)}
+                            {(member.surgeonName || '').charAt(0)}
                           </span>
                         </div>
                         <div>

@@ -68,7 +68,7 @@ export default function DoctorsPage() {
 
   const fetchDoctors = async () => {
     try {
-      const data = db.getDoctors();
+      const data = db.getDoctors() || [];
       setDoctors(data);
     } catch {
       toast.error("Failed to fetch doctors");

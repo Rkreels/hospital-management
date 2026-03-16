@@ -170,7 +170,7 @@ export default function PatientsPage() {
 
   // Filter patients
   useEffect(() => {
-    let result = patients;
+    let result = patients || [];
     
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -202,8 +202,8 @@ export default function PatientsPage() {
     setIsLoading(true);
     try {
       const data = db.getPatients();
-      setPatients(data);
-      setFilteredPatients(data);
+      setPatients(data || []);
+      setFilteredPatients(data || []);
     } catch {
       toast.error("Failed to fetch patients");
     } finally {
@@ -1338,7 +1338,7 @@ export default function PatientsPage() {
                               <Activity className="w-4 h-4 text-primary" />
                               Latest Vitals
                               <Badge variant="outline" className="ml-auto">
-                                {new Date(viewingPatient.vitalSigns[0].recordedAt).toLocaleString()}
+                                {new Date(viewingPatient.vitalSigns?.[0]?.recordedAt || new Date().toISOString()).toLocaleString()}
                               </Badge>
                             </h4>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

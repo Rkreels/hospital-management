@@ -630,11 +630,11 @@ export default function ReportsPage() {
     setIsLoading(true);
     try {
       const stats = db.getDashboardStats();
-      const patientsData = db.getPatients();
-      const invoicesData = db.getInvoices();
-      const departmentsData = db.getDepartments();
-      const medicationsData = db.getMedications();
-      const labOrdersData = db.getLabOrders();
+      const patientsData = db.getPatients() || [];
+      const invoicesData = db.getInvoices() || [];
+      const departmentsData = db.getDepartments() || [];
+      const medicationsData = db.getMedications() || [];
+      const labOrdersData = db.getLabOrders() || [];
       
       const trends = stats.patientTrend || [];
       

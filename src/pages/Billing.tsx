@@ -268,7 +268,7 @@ export default function BillingPage() {
 
   // Filtered invoices
   const filteredInvoices = useMemo(() => {
-    let filtered = invoices;
+    let filtered = invoices || [];
     
     if (quickFilter !== 'all') {
       filtered = filtered.filter(inv => inv.status === quickFilter);
@@ -289,23 +289,24 @@ export default function BillingPage() {
 
   // Summary statistics
   const stats = useMemo(() => {
-    const pending = invoices.filter(i => i.status === 'Pending').reduce((sum, i) => sum + i.outstandingAmount, 0);
-    const overdue = invoices.filter(i => i.status === 'Overdue').reduce((sum, i) => sum + i.outstandingAmount, 0);
-    const paid = invoices.filter(i => i.status === 'Paid').reduce((sum, i) => sum + i.total, 0);
-    const insurance = invoices.filter(i => i.status === 'Insurance').reduce((sum, i) => sum + i.outstandingAmount, 0);
+    const invoiceList = invoices || [];
+    const pending = invoiceList.filter(i => i.status === 'Pending').reduce((sum, i) => sum + (i.outstandingAmount || 0), 0);
+    const overdue = invoiceList.filter(i => i.status === 'Overdue').reduce((sum, i) => sum + (i.outstandingAmount || 0), 0);
+    const paid = invoiceList.filter(i => i.status === 'Paid').reduce((sum, i) => sum + (i.total || 0), 0);
+    const insurance = invoiceList.filter(i => i.status === 'Insurance').reduce((sum, i) => sum + (i.outstandingAmount || 0), 0);
     const totalOutstanding = pending + overdue + insurance;
     
     return {
-      pendingCount: invoices.filter(i => i.status === 'Pending').length,
-      overdueCount: invoices.filter(i => i.status === 'Overdue').length,
-      paidCount: invoices.filter(i => i.status === 'Paid').length,
-      insuranceCount: invoices.filter(i => i.status === 'Insurance').length,
+      pendingCount: invoiceList.filter(i => i.status === 'Pending').length,
+      overdueCount: invoiceList.filter(i => i.status === 'Overdue').length,
+      paidCount: invoiceList.filter(i => i.status === 'Paid').length,
+      insuranceCount: invoiceList.filter(i => i.status === 'Insurance').length,
       pendingAmount: pending,
       overdueAmount: overdue,
       paidAmount: paid,
       insuranceAmount: insurance,
       totalOutstanding,
-      totalRevenue: invoices.reduce((sum, i) => sum + i.total, 0),
+      totalRevenue: invoiceList.reduce((sum, i) => sum + (i.total || 0), 0),
     };
   }, [invoices]);
 
@@ -560,7 +561,7 @@ export default function BillingPage() {
   const canApprove = currentRole === 'admin' || currentRole === 'billing';
 
   // Calculate max height for chart bars
-  const maxRevenue = Math.max(...revenueData.map(d => d.revenue));
+  const maxRevenue = revenueData?.length > 0 ? Math.max(...revenueData.map(d => d.revenue)) : 1;
 
   return (
     <div className="space-y-6">

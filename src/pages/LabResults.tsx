@@ -148,10 +148,10 @@ export default function LabResultsPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const ordersData = db.getLabOrders();
-        const testsData = db.getLabTests();
-        const patientsData = db.getPatients();
-        const doctorsData = db.getDoctors();
+        const ordersData = db.getLabOrders() || [];
+        const testsData = db.getLabTests() || [];
+        const patientsData = db.getPatients() || [];
+        const doctorsData = db.getDoctors() || [];
         
         setLabOrders(ordersData);
         setLabTests(testsData);

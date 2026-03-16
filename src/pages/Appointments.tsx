@@ -214,7 +214,7 @@ export default function AppointmentsPage() {
 
   const fetchAppointments = async () => {
     try {
-      const data = db.getAppointments();
+      const data = db.getAppointments() || [];
       setAppointments(data);
     } catch {
       toast.error("Failed to fetch appointments");
@@ -223,7 +223,7 @@ export default function AppointmentsPage() {
 
   const fetchPatients = async () => {
     try {
-      const data = db.getPatients();
+      const data = db.getPatients() || [];
       setPatients(data);
     } catch {
       toast.error("Failed to fetch patients");
@@ -232,7 +232,7 @@ export default function AppointmentsPage() {
 
   const fetchDoctors = async () => {
     try {
-      const data = db.getDoctors();
+      const data = db.getDoctors() || [];
       setDoctors(data);
     } catch {
       toast.error("Failed to fetch doctors");
@@ -241,7 +241,7 @@ export default function AppointmentsPage() {
 
   const fetchDepartments = async () => {
     try {
-      const data = db.getDepartments();
+      const data = db.getDepartments() || [];
       setDepartments(data);
     } catch {
       toast.error("Failed to fetch departments");
@@ -252,7 +252,7 @@ export default function AppointmentsPage() {
     if (!doctorId || !date) return;
     setLoadingSlots(true);
     try {
-      const data = db.getAppointments()
+      const data = db.getAppointments() || [];
       setAvailableSlots(data);
     } catch {
       toast.error("Failed to fetch available slots");
@@ -623,7 +623,7 @@ export default function AppointmentsPage() {
                             src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${appointment.patientName}`}
                           />
                           <AvatarFallback>
-                            {appointment.patientName.charAt(0)}
+                            {(appointment.patientName || '').charAt(0)}
                           </AvatarFallback>
                         </Avatar>
                         <div>
@@ -891,9 +891,9 @@ export default function AppointmentsPage() {
                                 <AvatarImage
                                   src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${appointment.patientName}`}
                                 />
-                                <AvatarFallback>
-                                  {appointment.patientName.charAt(0)}
-                                </AvatarFallback>
+                                  <AvatarFallback>
+                                    {(appointment.patientName || '').charAt(0)}
+                                  </AvatarFallback>
                               </Avatar>
                               <div>
                                 <div className="font-medium">{appointment.patientName}</div>
@@ -1296,7 +1296,7 @@ export default function AppointmentsPage() {
                             className="w-full px-4 py-2 text-left hover:bg-muted flex items-center gap-3"
                           >
                             <Avatar className="w-8 h-8">
-                              <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                              <AvatarFallback>{(patient.name || '').charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
                               <div className="font-medium">{patient.name}</div>
@@ -1372,7 +1372,7 @@ export default function AppointmentsPage() {
                               <AvatarImage
                                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${doctor.name}`}
                               />
-                              <AvatarFallback>{doctor.name.charAt(0)}</AvatarFallback>
+                              <AvatarFallback>{(doctor.name || '').charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
                               <div>{doctor.name}</div>
@@ -1563,7 +1563,7 @@ export default function AppointmentsPage() {
                         src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedAppointment.patientName}`}
                       />
                       <AvatarFallback>
-                        {selectedAppointment.patientName.charAt(0)}
+                        {(selectedAppointment?.patientName || '').charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <div>

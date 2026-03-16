@@ -198,10 +198,10 @@ export default function StaffManagementPage() {
   const fetchStaff = async () => {
     setIsLoading(true);
     try {
-      const doctors = db.getDoctors();
-      const nurses = db.getNurses();
+      const doctors = db.getDoctors() || [];
+      const nurses = db.getNurses() || [];
       
-      const data: Staff[] = [...doctors, ...nurses].map(s => ({
+      const data: Staff[] = [...(doctors || []), ...(nurses || [])].map(s => ({
         ...s,
         role: s.role || (doctors.some(d => d.id === s.id) ? 'doctor' : 'nurse') as Staff['role'],
         certifications: (s as unknown as Staff).certifications || [],

@@ -111,8 +111,8 @@ export default function EmergencyPage() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const emergenciesData = db.getEmergencyCases();
-      const doctorsData = db.getDoctors();
+      const emergenciesData = db.getEmergencyCases() || [];
+      const doctorsData = db.getDoctors() || [];
       
       // Since there's no ambulances in store, create mock data
       const ambulancesData = [

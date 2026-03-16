@@ -115,7 +115,7 @@ export default function InventoryPage() {
   const fetchInventory = async () => {
     setLoading(true);
     try {
-      const data = db.getInventory();
+      const data = db.getInventory() || [];
       setInventory(data);
     } catch {
       toast.error("Failed to fetch inventory");

@@ -85,10 +85,10 @@ function OperatingRoomContent() {
       setLoading(true);
       const today = new Date().toISOString().split('T')[0];
       
-      const orData = db.getSurgeryTheaters();
-      const surgeriesData = db.getSurgeries().filter((s: Surgery) => s.scheduledDate === today);
-      const patientsData = db.getPatients();
-      const doctorsData = db.getDoctors();
+      const orData = db.getSurgeryTheaters() || [];
+      const surgeriesData = (db.getSurgeries() || []).filter((s: Surgery) => s.scheduledDate === today);
+      const patientsData = db.getPatients() || [];
+      const doctorsData = db.getDoctors() || [];
       
       setOperatingRooms(orData);
       setSurgeries(surgeriesData);
@@ -96,7 +96,7 @@ function OperatingRoomContent() {
       setDoctors(doctorsData);
       
       // Calculate stats
-      const allSurgeries = db.getSurgeries();
+      const allSurgeries = db.getSurgeries() || [];
       const todaySurgeries = allSurgeries.filter((s: Surgery) => s.scheduledDate === today);
       
       setStats({
