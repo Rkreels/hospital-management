@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { db } from '../lib/store';
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
-import Layout from "../components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -390,22 +389,19 @@ export default function SurgeriesPage() {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-96">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          >
-            <Activity className="w-8 h-8 text-primary" />
-          </motion.div>
-        </div>
-      </Layout>
+      <div className="flex items-center justify-center h-96">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        >
+          <Activity className="w-8 h-8 text-primary" />
+        </motion.div>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -787,9 +783,8 @@ export default function SurgeriesPage() {
             )}
           </AnimatePresence>
         </div>
-      </div>
 
-      {/* Schedule Surgery Dialog */}
+        {/* Schedule Surgery Dialog */}
       <Dialog open={scheduleDialogOpen} onOpenChange={setScheduleDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -1163,6 +1158,6 @@ export default function SurgeriesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Layout>
+    </div>
   );
 }

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { db } from '../lib/store';
 import { motion } from "framer-motion";
 import { Plus, Filter, MoreVertical, Calendar, CheckCircle, Trash2, Edit } from "lucide-react";
-import Layout from "../components/Layout";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -179,8 +178,7 @@ export default function TasksPage() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-8 h-full flex flex-col">
+    <div className="space-y-8 h-full flex flex-col">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-heading font-bold text-foreground">
@@ -447,6 +445,5 @@ export default function TasksPage() {
           </div>
         </Card>
       </div>
-    </Layout>
-  );
-}
+    );
+  }

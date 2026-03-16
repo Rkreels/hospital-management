@@ -14,7 +14,6 @@ import {
   Clock,
   Calendar,
 } from "lucide-react";
-import Layout from "../components/Layout";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -328,8 +327,7 @@ export default function PrescriptionsPage() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-heading font-bold text-foreground">Prescriptions</h1>
@@ -714,6 +712,5 @@ export default function PrescriptionsPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </Layout>
-  );
-}
+    );
+  }

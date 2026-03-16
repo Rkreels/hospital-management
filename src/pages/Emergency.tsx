@@ -26,7 +26,6 @@ import {
   BedDouble,
   ArrowRightLeft,
 } from "lucide-react";
-import Layout from "../components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -416,8 +415,7 @@ export default function EmergencyPage() {
   const canCreate = currentRole === "admin" || currentRole === "receptionist" || currentRole === "nurse";
 
   return (
-    <Layout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
           <div>
@@ -917,9 +915,8 @@ export default function EmergencyPage() {
             </Card>
           </div>
         </div>
-      </div>
 
-      {/* New Case Dialog */}
+        {/* New Case Dialog */}
       <Dialog open={isNewCaseOpen} onOpenChange={setIsNewCaseOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -1385,6 +1382,6 @@ export default function EmergencyPage() {
           )}
         </DialogContent>
       </Dialog>
-    </Layout>
+    </div>
   );
 }

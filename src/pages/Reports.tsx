@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { db } from '../lib/store';
 import { motion, AnimatePresence } from "framer-motion";
-import Layout from "../components/Layout";
 import { usePermission, useRole } from '../context/RoleContext';
 import { Patient, Invoice, Department, Medication, LabOrder, TrendData, DashboardStats } from "../types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
@@ -856,8 +855,7 @@ export default function ReportsPage() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -1160,6 +1158,5 @@ export default function ReportsPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </Layout>
-  );
-}
+    );
+  }

@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { db } from '../lib/store';
 import { motion } from "framer-motion";
 import { FileText, Search, Upload, File, FileImage, FileSpreadsheet, Download, Eye } from "lucide-react";
-import Layout from "../components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -64,8 +63,7 @@ export default function DocumentsPage() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-heading font-bold text-foreground">
@@ -204,6 +202,5 @@ export default function DocumentsPage() {
           </Card>
         </motion.div>
       </div>
-    </Layout>
-  );
-}
+    );
+  }

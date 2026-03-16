@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { db } from '../lib/store';
 import { motion } from "framer-motion";
 import { Bed, Users, MapPin } from "lucide-react";
-import Layout from "../components/Layout";
 import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 
@@ -48,8 +47,7 @@ export default function DepartmentsPage() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-heading font-bold text-foreground">
@@ -114,6 +112,5 @@ export default function DepartmentsPage() {
           ))}
         </motion.div>
       </div>
-    </Layout>
-  );
-}
+    );
+  }

@@ -30,7 +30,6 @@ import {
   Loader2,
   X,
 } from "lucide-react";
-import Layout from "../components/Layout";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -1003,8 +1002,7 @@ export default function AppointmentsPage() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
           <div>
@@ -1701,6 +1699,5 @@ export default function AppointmentsPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </Layout>
-  );
-}
+    );
+  }

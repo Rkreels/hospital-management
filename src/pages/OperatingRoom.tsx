@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { db } from '../lib/store';
-import Layout from "../components/Layout";
 import { usePermission } from '../context/RoleContext';
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -34,9 +33,7 @@ const COMMON_PROCEDURES = [
 
 export default function OperatingRoomPage() {
   return (
-    <Layout>
-      <OperatingRoomContent />
-    </Layout>
+    <OperatingRoomContent />
   );
 }
 

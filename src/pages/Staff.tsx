@@ -8,7 +8,6 @@ import {
   UserX, Building2, Calendar, Clock, Award, Download, X, Check, AlertCircle,
   Briefcase, GraduationCap, CalendarDays
 } from "lucide-react";
-import Layout from "../components/Layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -479,8 +478,7 @@ export default function StaffManagementPage() {
     : allLeaveRecords;
 
   return (
-    <Layout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
@@ -1392,6 +1390,5 @@ export default function StaffManagementPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </Layout>
-  );
-}
+    );
+  }

@@ -8,7 +8,6 @@ import {
   Package, Clock, DollarSign, Building2, AlertCircle, FileText,
   Printer, ShoppingCart, Eye, Check, Filter, RefreshCw, ArrowUpDown, Info
 } from "lucide-react";
-import Layout from "../components/Layout";
 import StatCard from "../components/StatCard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -465,8 +464,7 @@ export default function PharmacyPage() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
@@ -1851,6 +1849,5 @@ export default function PharmacyPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </Layout>
-  );
-}
+    );
+  }

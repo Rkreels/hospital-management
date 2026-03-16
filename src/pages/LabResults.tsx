@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { db } from '../lib/store';
 import { motion, AnimatePresence } from "framer-motion";
-import Layout from "../components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -525,8 +524,7 @@ export default function LabResultsPage() {
   const completedResults = labOrders.filter(o => o.status === "Completed");
 
   return (
-    <Layout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
@@ -1398,6 +1396,5 @@ export default function LabResultsPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </Layout>
-  );
-}
+    );
+  }

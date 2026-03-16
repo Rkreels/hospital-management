@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { db } from '../lib/store';
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import Layout from "../components/Layout";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -159,8 +158,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6 h-full flex flex-col">
+    <div className="space-y-6 h-full flex flex-col">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-heading font-bold text-foreground">
@@ -377,6 +375,5 @@ export default function CalendarPage() {
           </Card>
         </motion.div>
       </div>
-    </Layout>
-  );
-}
+    );
+  }
