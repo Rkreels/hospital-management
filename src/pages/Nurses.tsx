@@ -122,23 +122,15 @@ export default function NursesPage() {
       };
 
       if (editingNurse) {
-        const res = await fetch("/api/nurses", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: editingNurse.id, ...submitData }),
-        });
-        if (res.ok) {
+        const updated = db.updateNurse(editingNurse.id, submitData);
+        if (updated) {
           toast.success("Nurse updated successfully");
           fetchNurses();
           resetForm();
         }
       } else {
-        const res = await fetch("/api/nurses", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(submitData),
-        });
-        if (res.ok) {
+        const newNurse = db.addNurse(submitData);
+        if (newNurse) {
           toast.success("Nurse added successfully");
           fetchNurses();
           resetForm();
@@ -152,12 +144,8 @@ export default function NursesPage() {
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this nurse?")) {
       try {
-        const res = await fetch("/api/nurses", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id }),
-        });
-        if (res.ok) {
+        const deleted = db.deleteNurse(id);
+        if (deleted) {
           toast.success("Nurse deleted successfully");
           fetchNurses();
         }

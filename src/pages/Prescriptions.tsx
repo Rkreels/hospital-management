@@ -238,30 +238,27 @@ export default function PrescriptionsPage() {
     }
 
     try {
-      const res = await fetch("/api/prescriptions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          patientId: selectedPatient,
-          diagnosis,
-          notes,
-          items: validItems.map((item) => ({
-            ...item,
-            id: `PI-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            refillsRemaining: item.refills || 0,
-          })),
-          date: new Date().toISOString().split("T")[0],
-          validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-        }),
+      const patient = db.getPatient(selectedPatient);
+      const newPrescription = db.addPrescription({
+        patientId: selectedPatient,
+        patientName: patient?.name || '',
+        diagnosis,
+        notes,
+        items: validItems.map((item) => ({
+          ...item,
+          id: `PI-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          refillsRemaining: item.refills || 0,
+        })),
+        date: new Date().toISOString().split("T")[0],
+        validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+        status: 'Pending',
       });
 
-      if (res.ok) {
+      if (newPrescription) {
         toast.success("Prescription created successfully");
         setIsDialogOpen(false);
         resetForm();
         fetchPrescriptions();
-      } else {
-        toast.error("Failed to create prescription");
       }
     } catch {
       toast.error("Failed to create prescription");
@@ -270,17 +267,10 @@ export default function PrescriptionsPage() {
 
   const handleDispense = async (id: string) => {
     try {
-      const res = await fetch("/api/prescriptions", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: "Dispensed", dispensedAt: new Date().toISOString() }),
-      });
-
-      if (res.ok) {
+      const updated = db.updatePrescription(id, { status: "Dispensed", dispensedAt: new Date().toISOString() });
+      if (updated) {
         toast.success("Prescription dispensed successfully");
         fetchPrescriptions();
-      } else {
-        toast.error("Failed to dispense prescription");
       }
     } catch {
       toast.error("Failed to dispense prescription");

@@ -83,12 +83,8 @@ export default function CalendarPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      if (res.ok) {
+      const newEvent = db.addEvent(formData);
+      if (newEvent) {
         toast.success("Event added successfully");
         fetchEvents();
         resetForm();

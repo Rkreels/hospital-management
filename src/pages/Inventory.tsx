@@ -115,13 +115,8 @@ export default function InventoryPage() {
   const fetchInventory = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/inventory");
-      if (res.ok) {
-        const data = await res;
-        setInventory(data);
-      } else {
-        toast.error("Failed to fetch inventory");
-      }
+      const data = db.getInventory();
+      setInventory(data);
     } catch {
       toast.error("Failed to fetch inventory");
     } finally {
@@ -226,21 +221,11 @@ export default function InventoryPage() {
     }
 
     try {
-      const res = await fetch("/api/inventory", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: selectedItem.id,
-          quantity: newQuantity,
-        }),
-      });
-
-      if (res.ok) {
+      const updated = db.updateInventoryItem(selectedItem.id, { quantity: newQuantity });
+      if (updated) {
         toast.success("Stock updated successfully");
         fetchInventory();
         setIsUpdateDialogOpen(false);
-      } else {
-        toast.error("Failed to update stock");
       }
     } catch {
       toast.error("Failed to update stock");

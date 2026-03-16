@@ -629,17 +629,14 @@ export default function ReportsPage() {
   const fetchReportData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [statsRes, trendsRes, patientsRes, invoicesRes, departmentsRes, medicationsRes, labOrdersRes] = await Promise.all([
-        fetch("/api/dashboard"), fetch("/api/dashboard/trends?days=30"), fetch("/api/patients"),
-        fetch("/api/billing"), fetch("/api/departments"), fetch("/api/pharmacy"), fetch("/api/lab-results"),
-      ]);
-      const stats = await statsRes;
-      const trends = await trendsRes;
-      const patientsData: Patient[] = await patientsRes;
-      const invoicesData: Invoice[] = await invoicesRes;
-      const departmentsData: Department[] = await departmentsRes;
-      const medicationsData: Medication[] = await medicationsRes;
-      const labOrdersData: LabOrder[] = await labOrdersRes;
+      const stats = db.getDashboardStats();
+      const patientsData = db.getPatients();
+      const invoicesData = db.getInvoices();
+      const departmentsData = db.getDepartments();
+      const medicationsData = db.getMedications();
+      const labOrdersData = db.getLabOrders();
+      
+      const trends = stats.patientTrend || [];
       
       setPatients(patientsData);
       setInvoices(invoicesData);

@@ -79,23 +79,18 @@ export default function DoctorsPage() {
     e.preventDefault();
     try {
       if (editingDoctor) {
-        const res = await fetch("/api/doctors", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: editingDoctor.id, ...formData }),
-        });
-        if (res.ok) {
+        const updated = db.updateDoctor(editingDoctor.id, formData);
+        if (updated) {
           toast.success("Doctor updated successfully");
           fetchDoctors();
           resetForm();
         }
       } else {
-        const res = await fetch("/api/doctors", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+        const newDoctor = db.addDoctor({
+          ...formData,
+          patientsCount: 0,
         });
-        if (res.ok) {
+        if (newDoctor) {
           toast.success("Doctor added successfully");
           fetchDoctors();
           resetForm();
@@ -109,12 +104,8 @@ export default function DoctorsPage() {
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this doctor?")) {
       try {
-        const res = await fetch("/api/doctors", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id }),
-        });
-        if (res.ok) {
+        const deleted = db.deleteDoctor(id);
+        if (deleted) {
           toast.success("Doctor deleted successfully");
           fetchDoctors();
         }

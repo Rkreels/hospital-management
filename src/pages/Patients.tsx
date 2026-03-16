@@ -255,23 +255,15 @@ export default function PatientsPage() {
       };
 
       if (editingPatient) {
-        const res = await fetch("/api/patients", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: editingPatient.id, ...patientData }),
-        });
-        if (res.ok) {
+        const updated = db.updatePatient(editingPatient.id, patientData);
+        if (updated) {
           toast.success("Patient updated successfully");
           fetchPatients();
           resetForm();
         }
       } else {
-        const res = await fetch("/api/patients", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(patientData),
-        });
-        if (res.ok) {
+        const newPatient = db.addPatient(patientData);
+        if (newPatient) {
           toast.success("Patient added successfully");
           fetchPatients();
           resetForm();
@@ -285,12 +277,8 @@ export default function PatientsPage() {
   const handleDelete = async () => {
     if (!deletingPatient) return;
     try {
-      const res = await fetch("/api/patients", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: deletingPatient.id }),
-      });
-      if (res.ok) {
+      const deleted = db.deletePatient(deletingPatient.id);
+      if (deleted) {
         toast.success("Patient deleted successfully");
         fetchPatients();
         setIsDeleteDialogOpen(false);
@@ -318,18 +306,11 @@ export default function PatientsPage() {
       };
       
       const updatedVitals = [newVital, ...(viewingPatient.vitalSigns || [])];
-      const res = await fetch("/api/patients", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: viewingPatient.id,
-          vitalSigns: updatedVitals,
-        }),
-      });
-      if (res.ok) {
+      const updated = db.updatePatient(viewingPatient.id, { vitalSigns: updatedVitals });
+      if (updated) {
         toast.success("Vitals recorded successfully");
-        const updated = await fetchPatientDetails(viewingPatient.id);
-        if (updated) setViewingPatient(updated);
+        const patient = db.getPatient(viewingPatient.id);
+        if (patient) setViewingPatient(patient);
         setVitalForm(initialVitalForm);
         setIsVitalsDialogOpen(false);
       }
@@ -350,18 +331,11 @@ export default function PatientsPage() {
       };
       
       const updatedAllergies = [...(viewingPatient.allergies || []), newAllergy];
-      const res = await fetch("/api/patients", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: viewingPatient.id,
-          allergies: updatedAllergies,
-        }),
-      });
-      if (res.ok) {
+      const updated = db.updatePatient(viewingPatient.id, { allergies: updatedAllergies });
+      if (updated) {
         toast.success("Allergy added successfully");
-        const updated = await fetchPatientDetails(viewingPatient.id);
-        if (updated) setViewingPatient(updated);
+        const patient = db.getPatient(viewingPatient.id);
+        if (patient) setViewingPatient(patient);
         setAllergyForm(initialAllergyForm);
         setIsAllergyDialogOpen(false);
       }
@@ -374,18 +348,11 @@ export default function PatientsPage() {
     if (!viewingPatient) return;
     try {
       const updatedAllergies = viewingPatient.allergies.filter(a => a.id !== allergyId);
-      const res = await fetch("/api/patients", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: viewingPatient.id,
-          allergies: updatedAllergies,
-        }),
-      });
-      if (res.ok) {
+      const updated = db.updatePatient(viewingPatient.id, { allergies: updatedAllergies });
+      if (updated) {
         toast.success("Allergy removed successfully");
-        const updated = await fetchPatientDetails(viewingPatient.id);
-        if (updated) setViewingPatient(updated);
+        const patient = db.getPatient(viewingPatient.id);
+        if (patient) setViewingPatient(patient);
       }
     } catch {
       toast.error("Failed to remove allergy");
@@ -408,18 +375,11 @@ export default function PatientsPage() {
       };
       
       const updatedMedications = [...(viewingPatient.currentMedications || []), newMedication];
-      const res = await fetch("/api/patients", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: viewingPatient.id,
-          currentMedications: updatedMedications,
-        }),
-      });
-      if (res.ok) {
+      const updated = db.updatePatient(viewingPatient.id, { currentMedications: updatedMedications });
+      if (updated) {
         toast.success("Medication added successfully");
-        const updated = await fetchPatientDetails(viewingPatient.id);
-        if (updated) setViewingPatient(updated);
+        const patient = db.getPatient(viewingPatient.id);
+        if (patient) setViewingPatient(patient);
         setMedicationForm(initialMedicationForm);
         setIsMedicationDialogOpen(false);
       }
@@ -434,18 +394,11 @@ export default function PatientsPage() {
       const updatedMedications = viewingPatient.currentMedications.map(m => 
         m.id === medicationId ? { ...m, status: 'Discontinued' as const, endDate: new Date().toISOString().split('T')[0] } : m
       );
-      const res = await fetch("/api/patients", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: viewingPatient.id,
-          currentMedications: updatedMedications,
-        }),
-      });
-      if (res.ok) {
+      const updated = db.updatePatient(viewingPatient.id, { currentMedications: updatedMedications });
+      if (updated) {
         toast.success("Medication discontinued successfully");
-        const updated = await fetchPatientDetails(viewingPatient.id);
-        if (updated) setViewingPatient(updated);
+        const patient = db.getPatient(viewingPatient.id);
+        if (patient) setViewingPatient(patient);
       }
     } catch {
       toast.error("Failed to discontinue medication");

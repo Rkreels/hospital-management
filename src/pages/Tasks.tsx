@@ -77,23 +77,15 @@ export default function TasksPage() {
     e.preventDefault();
     try {
       if (editingTask) {
-        const res = await fetch("/api/tasks", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: editingTask.id, ...formData }),
-        });
-        if (res.ok) {
+        const updated = db.updateTask(editingTask.id, formData);
+        if (updated) {
           toast.success("Task updated successfully");
           fetchTasks();
           resetForm();
         }
       } else {
-        const res = await fetch("/api/tasks", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-        if (res.ok) {
+        const newTask = db.addTask(formData);
+        if (newTask) {
           toast.success("Task added successfully");
           fetchTasks();
           resetForm();
@@ -107,12 +99,8 @@ export default function TasksPage() {
   const handleStatusToggle = async (task: Task) => {
     const newStatus = task.status === "Done" ? "To Do" : "Done";
     try {
-      const res = await fetch("/api/tasks", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: task.id, status: newStatus }),
-      });
-      if (res.ok) {
+      const updated = db.updateTask(task.id, { status: newStatus });
+      if (updated) {
         fetchTasks();
       }
     } catch {
@@ -123,12 +111,8 @@ export default function TasksPage() {
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this task?")) {
       try {
-        const res = await fetch("/api/tasks", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id }),
-        });
-        if (res.ok) {
+        const deleted = db.deleteTask(id);
+        if (deleted) {
           toast.success("Task deleted successfully");
           fetchTasks();
         }

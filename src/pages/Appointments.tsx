@@ -385,26 +385,22 @@ export default function AppointmentsPage() {
 
     try {
       if (editingAppointment) {
-        const res = await fetch("/api/appointments", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id: editingAppointment.id,
-            ...formData,
-          }),
-        });
-        if (res.ok) {
+        const updated = db.updateAppointment(editingAppointment.id, formData);
+        if (updated) {
           toast.success("Appointment updated successfully");
           fetchAppointments();
           resetForm();
         }
       } else {
-        const res = await fetch("/api/appointments", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+        const patient = db.getPatient(formData.patientId);
+        const doctor = db.getDoctor(formData.doctorId);
+        const newAppointment = db.addAppointment({
+          ...formData,
+          patientName: patient?.name || formData.patientName,
+          doctorName: doctor?.name || formData.doctorName,
+          status: 'Scheduled',
         });
-        if (res.ok) {
+        if (newAppointment) {
           toast.success("Appointment scheduled successfully");
           fetchAppointments();
           resetForm();
@@ -417,12 +413,8 @@ export default function AppointmentsPage() {
 
   const handleStatusChange = async (id: string, status: AppointmentStatus) => {
     try {
-      const res = await fetch("/api/appointments", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status }),
-      });
-      if (res.ok) {
+      const updated = db.updateAppointment(id, { status });
+      if (updated) {
         toast.success(`Appointment marked as ${status}`);
         fetchAppointments();
       }
@@ -434,12 +426,8 @@ export default function AppointmentsPage() {
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to cancel this appointment?")) {
       try {
-        const res = await fetch("/api/appointments", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id }),
-        });
-        if (res.ok) {
+        const deleted = db.deleteAppointment(id);
+        if (deleted) {
           toast.success("Appointment cancelled successfully");
           fetchAppointments();
         }
@@ -473,15 +461,9 @@ export default function AppointmentsPage() {
     }
 
     try {
-      await Promise.all(
-        selectedIds.map((id) =>
-          fetch("/api/appointments", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, status }),
-          })
-        )
-      );
+      selectedIds.forEach(id => {
+        db.updateAppointment(id, { status });
+      });
       toast.success(`${selectedIds.length} appointments updated to ${status}`);
       setSelectedIds([]);
       setIsBulkMode(false);
@@ -499,15 +481,9 @@ export default function AppointmentsPage() {
 
     if (confirm(`Are you sure you want to cancel ${selectedIds.length} appointments?`)) {
       try {
-        await Promise.all(
-          selectedIds.map((id) =>
-            fetch("/api/appointments", {
-              method: "DELETE",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ id }),
-            })
-          )
-        );
+        selectedIds.forEach(id => {
+          db.deleteAppointment(id);
+        });
         toast.success(`${selectedIds.length} appointments cancelled`);
         setSelectedIds([]);
         setIsBulkMode(false);

@@ -208,23 +208,15 @@ export default function PharmacyPage() {
       };
 
       if (editingMedication) {
-        const res = await fetch("/api/pharmacy", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: editingMedication.id, ...payload }),
-        });
-        if (res.ok) {
+        const updated = db.updateMedication(editingMedication.id, payload);
+        if (updated) {
           toast.success("Medication updated successfully");
           fetchMedications();
           resetMedicationForm();
         }
       } else {
-        const res = await fetch("/api/pharmacy", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (res.ok) {
+        const newMed = db.addMedication(payload);
+        if (newMed) {
           toast.success("Medication added successfully");
           fetchMedications();
           resetMedicationForm();
@@ -238,12 +230,8 @@ export default function PharmacyPage() {
   const handleDeleteMedication = async (id: string) => {
     if (confirm("Are you sure you want to delete this medication?")) {
       try {
-        const res = await fetch("/api/pharmacy", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id }),
-        });
-        if (res.ok) {
+        const deleted = db.deleteMedication(id);
+        if (deleted) {
           toast.success("Medication deleted successfully");
           fetchMedications();
         }
@@ -255,15 +243,10 @@ export default function PharmacyPage() {
 
   const handleReorder = async (medication: Medication) => {
     try {
-      const res = await fetch("/api/pharmacy", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: medication.id,
-          stock: medication.reorderLevel * 3,
-        }),
+      const updated = db.updateMedication(medication.id, {
+        stock: medication.reorderLevel * 3,
       });
-      if (res.ok) {
+      if (updated) {
         toast.success(`Reordered ${medication.name}. Stock updated to ${medication.reorderLevel * 3}`);
         fetchMedications();
         setIsReorderDialogOpen(false);
@@ -291,19 +274,14 @@ export default function PharmacyPage() {
 
       const allDispensed = updatedItems.every(item => item.isDispensed);
       
-      const res = await fetch("/api/prescriptions", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: selectedPrescription.id,
-          items: updatedItems,
-          status: allDispensed ? "Dispensed" : "Partially Dispensed",
-          dispensedBy: "Pharmacist",
-          dispensedAt: new Date().toISOString(),
-        }),
+      const updated = db.updatePrescription(selectedPrescription.id, {
+        items: updatedItems,
+        status: allDispensed ? "Dispensed" : "Partially Dispensed",
+        dispensedBy: "Pharmacist",
+        dispensedAt: new Date().toISOString(),
       });
 
-      if (res.ok) {
+      if (updated) {
         toast.success("Medication dispensed successfully");
         setIsDispenseDialogOpen(false);
         setDispensingItem(null);

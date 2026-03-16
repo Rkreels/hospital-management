@@ -121,17 +121,10 @@ export default function SurgeriesPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [surgeriesRes, theatersRes, patientsRes, doctorsRes] = await Promise.all([
-          fetch("/api/surgeries"),
-          fetch("/api/theaters"),
-          fetch("/api/patients"),
-          fetch("/api/doctors"),
-        ]);
-
-        const surgeriesData = await surgeriesRes;
-        const theatersData = await theatersRes;
-        const patientsData = await patientsRes;
-        const doctorsData = await doctorsRes;
+        const surgeriesData = db.getSurgeries();
+        const theatersData = db.getSurgeryTheaters();
+        const patientsData = db.getPatients();
+        const doctorsData = db.getDoctors();
 
         setSurgeries(Array.isArray(surgeriesData) ? surgeriesData : []);
         setTheaters(Array.isArray(theatersData) ? theatersData : []);
@@ -217,23 +210,17 @@ export default function SurgeriesPage() {
       };
 
       if (editMode && selectedSurgery) {
-        const res = await fetch("/api/surgeries", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: selectedSurgery.id, ...surgeryData }),
-        });
-        const updated = await res;
-        setSurgeries(surgeries.map((s) => (s.id === selectedSurgery.id ? updated : s)));
-        toast.success("Surgery updated successfully");
+        const updated = db.updateSurgery(selectedSurgery.id, surgeryData);
+        if (updated) {
+          setSurgeries(surgeries.map((s) => (s.id === selectedSurgery.id ? updated : s)));
+          toast.success("Surgery updated successfully");
+        }
       } else {
-        const res = await fetch("/api/surgeries", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(surgeryData),
-        });
-        const newSurgery = await res;
-        setSurgeries([newSurgery, ...surgeries]);
-        toast.success("Surgery scheduled successfully");
+        const newSurgery = db.addSurgery(surgeryData);
+        if (newSurgery) {
+          setSurgeries([newSurgery, ...surgeries]);
+          toast.success("Surgery scheduled successfully");
+        }
       }
 
       setScheduleDialogOpen(false);
@@ -247,14 +234,11 @@ export default function SurgeriesPage() {
   // Handle status update
   const handleStatusUpdate = async (surgeryId: string, newStatus: string) => {
     try {
-      const res = await fetch("/api/surgeries", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: surgeryId, status: newStatus }),
-      });
-      const updated = await res;
-      setSurgeries(surgeries.map((s) => (s.id === surgeryId ? updated : s)));
-      toast.success(`Surgery status updated to ${newStatus}`);
+      const updated = db.updateSurgery(surgeryId, { status: newStatus as Surgery['status'] });
+      if (updated) {
+        setSurgeries(surgeries.map((s) => (s.id === surgeryId ? updated : s)));
+        toast.success(`Surgery status updated to ${newStatus}`);
+      }
     } catch {
       console.error("Failed to update status:", error);
       toast.error("Failed to update surgery status");
@@ -264,12 +248,11 @@ export default function SurgeriesPage() {
   // Handle delete (cancel)
   const handleDelete = async (surgeryId: string) => {
     try {
-      const res = await fetch(`/api/surgeries?id=${surgeryId}`, {
-        method: "DELETE",
-      });
-      const updated = await res;
-      setSurgeries(surgeries.map((s) => (s.id === surgeryId ? updated : s)));
-      toast.success("Surgery cancelled successfully");
+      const updated = db.updateSurgery(surgeryId, { status: 'Cancelled' as Surgery['status'] });
+      if (updated) {
+        setSurgeries(surgeries.map((s) => (s.id === surgeryId ? updated : s)));
+        toast.success("Surgery cancelled successfully");
+      }
     } catch {
       console.error("Failed to cancel surgery:", error);
       toast.error("Failed to cancel surgery");
@@ -288,13 +271,10 @@ export default function SurgeriesPage() {
     );
 
     try {
-      const res = await fetch("/api/surgeries", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: surgeryId, preOpChecklist: updatedChecklist }),
-      });
-      const updated = await res;
-      setSurgeries(surgeries.map((s) => (s.id === surgeryId ? updated : s)));
+      const updated = db.updateSurgery(surgeryId, { preOpChecklist: updatedChecklist });
+      if (updated) {
+        setSurgeries(surgeries.map((s) => (s.id === surgeryId ? updated : s)));
+      }
     } catch {
       console.error("Failed to update checklist:", error);
       toast.error("Failed to update checklist");

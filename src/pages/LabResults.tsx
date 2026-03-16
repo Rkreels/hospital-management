@@ -148,17 +148,10 @@ export default function LabResultsPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [ordersRes, testsRes, patientsRes, doctorsRes] = await Promise.all([
-          fetch("/api/lab-results"),
-          fetch("/api/lab-tests"),
-          fetch("/api/patients"),
-          fetch("/api/doctors"),
-        ]);
-        
-        const ordersData = await ordersRes;
-        const testsData = await testsRes;
-        const patientsData = await patientsRes;
-        const doctorsData = await doctorsRes;
+        const ordersData = db.getLabOrders();
+        const testsData = db.getLabTests();
+        const patientsData = db.getPatients();
+        const doctorsData = db.getDoctors();
         
         setLabOrders(ordersData);
         setLabTests(testsData);
@@ -199,7 +192,7 @@ export default function LabResultsPage() {
   // Refresh orders
   const refreshOrders = useCallback(async () => {
     try {
-      const data = db.getLabResult();
+      const data = db.getLabOrders();
       setLabOrders(data);
       
       // Recalculate stats
@@ -227,26 +220,27 @@ export default function LabResultsPage() {
     }
     
     const selectedTests = labTests.filter(t => newOrder.tests.includes(t.id));
+    const patient = db.getPatient(newOrder.patientId);
+    const doctor = db.getDoctor(newOrder.doctorId);
     
     try {
-      const res = await fetch("/api/lab-results", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          patientId: newOrder.patientId,
-          doctorId: newOrder.doctorId,
-          tests: selectedTests.map(t => ({
-            testId: t.id,
-            testName: t.name,
-            testCode: t.code,
-          })),
-          priority: newOrder.priority,
-          diagnosis: newOrder.diagnosis,
-          notes: newOrder.notes,
-        }),
+      const newLabOrder = db.addLabOrder({
+        patientId: newOrder.patientId,
+        patientName: patient?.name || '',
+        doctorId: newOrder.doctorId,
+        doctorName: doctor?.name || '',
+        tests: selectedTests.map(t => ({
+          testId: t.id,
+          testName: t.name,
+          testCode: t.code,
+        })),
+        priority: newOrder.priority,
+        diagnosis: newOrder.diagnosis,
+        notes: newOrder.notes,
+        status: 'Ordered',
       });
       
-      if (res.ok) {
+      if (newLabOrder) {
         toast.success("Lab order created successfully");
         setShowNewOrderDialog(false);
         setNewOrder({
@@ -258,9 +252,6 @@ export default function LabResultsPage() {
           notes: "",
         });
         refreshOrders();
-      } else {
-        const error = await res;
-        toast.error(error.error || "Failed to create order");
       }
     } catch {
       toast.error("Failed to create order");
@@ -270,13 +261,8 @@ export default function LabResultsPage() {
   // Update order status
   const handleStatusUpdate = async (orderId: string, newStatus: LabOrderStatus) => {
     try {
-      const res = await fetch("/api/lab-results", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: orderId, status: newStatus }),
-      });
-      
-      if (res.ok) {
+      const updated = db.updateLabOrder(orderId, { status: newStatus });
+      if (updated) {
         toast.success(`Status updated to ${newStatus}`);
         refreshOrders();
       }
@@ -288,13 +274,8 @@ export default function LabResultsPage() {
   // Cancel order
   const handleCancelOrder = async (orderId: string) => {
     try {
-      const res = await fetch("/api/lab-results", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: orderId }),
-      });
-      
-      if (res.ok) {
+      const updated = db.updateLabOrder(orderId, { status: 'Cancelled' });
+      if (updated) {
         toast.success("Lab order cancelled");
         refreshOrders();
       }
@@ -327,18 +308,21 @@ export default function LabResultsPage() {
   const handleEnterResults = async () => {
     if (!selectedOrder || !selectedTestForResults) return;
     
-    try {
-      const res = await fetch("/api/lab-results", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: selectedOrder.id,
-          testId: selectedTestForResults.id,
+    // Find the test in the order and update its results
+    const updatedTests = selectedOrder.tests.map(test => {
+      if (test.id === selectedTestForResults.id) {
+        return {
+          ...test,
           results: testResults,
-        }),
-      });
-      
-      if (res.ok) {
+          status: 'Completed' as const,
+        };
+      }
+      return test;
+    });
+    
+    try {
+      const updated = db.updateLabOrder(selectedOrder.id, { tests: updatedTests });
+      if (updated) {
         toast.success("Results saved successfully");
         setShowResultsDialog(false);
         setSelectedTestForResults(null);

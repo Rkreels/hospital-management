@@ -198,28 +198,30 @@ export default function StaffManagementPage() {
   const fetchStaff = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/staff');
-      if (res.ok) {
-        const data: Staff[] = await res;
-        setStaffList(data.map(s => ({
-          ...s,
-          certifications: s.certifications || [],
-          qualifications: s.qualifications || [],
-          schedule: s.schedule || generateSchedule(),
-          attendance: s.attendance || generateAttendanceRecords(),
-          leaveBalance: s.leaveBalance || { annual: 15, sick: 10, personal: 5 },
-        })));
-        
-        // Generate all leave records for leave management
-        const leaves: (LeaveRecord & { staffId: string; staffName: string })[] = [];
-        data.forEach(staff => {
-          const staffLeaves = generateLeaveRecords();
-          staffLeaves.forEach(leave => {
-            leaves.push({ ...leave, staffId: staff.id, staffName: staff.name });
-          });
+      const doctors = db.getDoctors();
+      const nurses = db.getNurses();
+      
+      const data: Staff[] = [...doctors, ...nurses].map(s => ({
+        ...s,
+        role: s.role || (doctors.some(d => d.id === s.id) ? 'doctor' : 'nurse') as Staff['role'],
+        certifications: (s as unknown as Staff).certifications || [],
+        qualifications: (s as unknown as Staff).qualifications || [],
+        schedule: (s as unknown as Staff).schedule || generateSchedule(),
+        attendance: (s as unknown as Staff).attendance || generateAttendanceRecords(),
+        leaveBalance: (s as unknown as Staff).leaveBalance || { annual: 15, sick: 10, personal: 5 },
+      }));
+      
+      setStaffList(data);
+      
+      // Generate all leave records for leave management
+      const leaves: (LeaveRecord & { staffId: string; staffName: string })[] = [];
+      data.forEach(staff => {
+        const staffLeaves = generateLeaveRecords();
+        staffLeaves.forEach(leave => {
+          leaves.push({ ...leave, staffId: staff.id, staffName: staff.name });
         });
-        setAllLeaveRecords(leaves);
-      }
+      });
+      setAllLeaveRecords(leaves);
     } catch {
       toast.error("Failed to fetch staff data");
     } finally {
@@ -269,27 +271,38 @@ export default function StaffManagementPage() {
   // CRUD operations
   const handleCreateStaff = async () => {
     try {
-      const res = await fetch('/api/staff', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...staffForm,
-          emergencyContact: staffForm.emergencyContactName ? {
-            name: staffForm.emergencyContactName,
-            relationship: staffForm.emergencyContactRelationship,
-            phone: staffForm.emergencyContactPhone,
-          } : undefined,
-          schedule: generateSchedule(),
-          attendance: generateAttendanceRecords(),
-        }),
-      });
-
-      if (res.ok) {
-        toast.success("Staff member created successfully");
-        fetchStaff();
-        resetForm();
+      if (staffForm.role === 'doctor') {
+        const newDoctor = db.addDoctor({
+          name: staffForm.name,
+          department: staffForm.department,
+          email: staffForm.email,
+          phone: staffForm.phone,
+          specialty: staffForm.department,
+          status: staffForm.status as 'Available' | 'On Leave' | 'Busy' | 'Off Duty',
+          availability: '9:00 AM - 5:00 PM',
+          patientsCount: 0,
+        });
+        if (newDoctor) {
+          toast.success("Staff member created successfully");
+          fetchStaff();
+          resetForm();
+        }
+      } else if (staffForm.role === 'nurse') {
+        const newNurse = db.addNurse({
+          name: staffForm.name,
+          department: staffForm.department,
+          email: staffForm.email,
+          phone: staffForm.phone,
+          status: staffForm.status as 'Available' | 'On Leave' | 'Busy' | 'Off Duty',
+          shift: 'Morning',
+        });
+        if (newNurse) {
+          toast.success("Staff member created successfully");
+          fetchStaff();
+          resetForm();
+        }
       } else {
-        toast.error("Failed to create staff member");
+        toast.error("Unsupported role for staff creation");
       }
     } catch {
       toast.error("Failed to create staff member");
@@ -299,26 +312,38 @@ export default function StaffManagementPage() {
   const handleUpdateStaff = async () => {
     if (!editingStaff) return;
     try {
-      const res = await fetch('/api/staff', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: editingStaff.id,
-          ...staffForm,
-          emergencyContact: staffForm.emergencyContactName ? {
-            name: staffForm.emergencyContactName,
-            relationship: staffForm.emergencyContactRelationship,
-            phone: staffForm.emergencyContactPhone,
-          } : undefined,
-        }),
-      });
-
-      if (res.ok) {
-        toast.success("Staff member updated successfully");
-        fetchStaff();
-        resetForm();
+      const isDoctor = db.getDoctors().some(d => d.id === editingStaff.id);
+      const isNurse = db.getNurses().some(n => n.id === editingStaff.id);
+      
+      if (isDoctor) {
+        const updated = db.updateDoctor(editingStaff.id, {
+          name: staffForm.name,
+          department: staffForm.department,
+          email: staffForm.email,
+          phone: staffForm.phone,
+          specialty: staffForm.department,
+          status: staffForm.status as 'Available' | 'On Leave' | 'Busy' | 'Off Duty',
+        });
+        if (updated) {
+          toast.success("Staff member updated successfully");
+          fetchStaff();
+          resetForm();
+        }
+      } else if (isNurse) {
+        const updated = db.updateNurse(editingStaff.id, {
+          name: staffForm.name,
+          department: staffForm.department,
+          email: staffForm.email,
+          phone: staffForm.phone,
+          status: staffForm.status as 'Available' | 'On Leave' | 'Busy' | 'Off Duty',
+        });
+        if (updated) {
+          toast.success("Staff member updated successfully");
+          fetchStaff();
+          resetForm();
+        }
       } else {
-        toast.error("Failed to update staff member");
+        toast.error("Staff member not found");
       }
     } catch {
       toast.error("Failed to update staff member");
@@ -328,13 +353,17 @@ export default function StaffManagementPage() {
   const handleDeleteStaff = async (id: string) => {
     if (!confirm("Are you sure you want to delete this staff member?")) return;
     try {
-      const res = await fetch('/api/staff', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      });
-
-      if (res.ok) {
+      const isDoctor = db.getDoctors().some(d => d.id === id);
+      const isNurse = db.getNurses().some(n => n.id === id);
+      
+      let deleted = false;
+      if (isDoctor) {
+        deleted = db.deleteDoctor(id);
+      } else if (isNurse) {
+        deleted = db.deleteNurse(id);
+      }
+      
+      if (deleted) {
         toast.success("Staff member deleted successfully");
         fetchStaff();
       } else {
