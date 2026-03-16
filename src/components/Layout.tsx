@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Calendar as CalendarIcon,
@@ -30,9 +29,9 @@ import {
   WifiOff,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,12 +39,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import { useRole } from "@/lib/role-context";
-import { UserRole } from "@/types";
-import { useNotifications } from "@/hooks/useNotifications";
-import { NotificationPanel } from "@/components/NotificationPanel";
+} from "./ui/dropdown-menu";
+import { Badge } from "./ui/badge";
+import { useRole } from "../context/RoleContext";
+import { UserRole } from "../types";
+import { useNotifications } from "../hooks/useNotifications";
+import { NotificationPanel } from "./NotificationPanel";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard, roles: ['admin', 'doctor', 'nurse', 'receptionist', 'pharmacist', 'lab_tech', 'billing', 'patient'] },
@@ -72,11 +71,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<{ type: string; id: string; title: string; subtitle: string; url: string }[]>([]);
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
-  const pathname = usePathname();
-  const router = useRouter();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { currentUser, currentRole, switchRole, getRoleLabel, getRoleColor, hasPermission } = useRole();
   
-  // Real-time notifications hook
   const {
     notifications,
     unreadCount,
@@ -89,8 +87,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     setSearchQuery(query);
     if (query.length > 2) {
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        const data = await res.json();
+        const { db } = await import('../lib/store');
+        const data = db.globalSearch(query);
         setSearchResults(data.slice(0, 8));
       } catch {
         setSearchResults([]);
@@ -101,14 +99,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const handleNavigate = (url: string) => {
-    router.push(url);
+    navigate(url);
+    setSearchQuery("");
+    setSearchResults([]);
   };
 
   const filteredNavigation = navigation.filter(item => item.roles.includes(currentRole));
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* Mobile sidebar backdrop */}
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
@@ -121,23 +120,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
       <motion.div
         className={`fixed inset-y-0 left-0 z-50 w-72 bg-sidebar border-r border-sidebar-border transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:flex lg:flex-col ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex items-center justify-between h-20 px-6 border-b border-sidebar-border">
-          <Link href="/" className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
-              <span className="text-primary-foreground font-heading font-bold text-xl">
-                H
-              </span>
+              <span className="text-primary-foreground font-heading font-bold text-xl">H</span>
             </div>
             <div>
-              <span className="text-xl font-heading font-bold text-sidebar-foreground">
-                HospitalHub
-              </span>
+              <span className="text-xl font-heading font-bold text-sidebar-foreground">HospitalHub</span>
               <p className="text-xs text-muted-foreground">Management System</p>
             </div>
           </Link>
@@ -151,11 +145,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1 custom-scrollbar">
           {filteredNavigation.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = location.pathname === item.href;
             return (
               <Link
                 key={item.name}
-                href={item.href}
+                to={item.href}
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                   isActive
@@ -177,7 +171,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="p-4 border-t border-sidebar-border">
-          <Link href="/settings" className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all duration-200">
+          <Link to="/settings" className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all duration-200">
             <Settings className="w-5 h-5" />
             <span>Settings</span>
           </Link>
@@ -198,9 +192,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   {getRoleLabel(currentRole)}
                 </Badge>
                 {isConnected ? (
-                  <Wifi className="w-3 h-3 text-green-500" title="Connected" />
+                  <Wifi className="w-3 h-3 text-green-500" />
                 ) : (
-                  <WifiOff className="w-3 h-3 text-muted-foreground" title="Disconnected" />
+                  <WifiOff className="w-3 h-3 text-muted-foreground" />
                 )}
               </div>
             </div>
@@ -208,9 +202,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </motion.div>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Header */}
         <header className="h-16 flex-shrink-0 bg-background/80 backdrop-blur-md border-b border-border flex items-center justify-between px-4 lg:px-6 z-30 sticky top-0">
           <div className="flex items-center gap-4 flex-1">
             <button
@@ -228,7 +220,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 onChange={(e) => handleSearch(e.target.value)}
                 className="w-full pl-10 pr-4 bg-muted/50 border-transparent focus:bg-background focus:border-ring"
               />
-              {/* Search Results Dropdown */}
               <AnimatePresence>
                 {searchResults.length > 0 && (
                   <motion.div
@@ -240,7 +231,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     {searchResults.map((result, i) => (
                       <Link
                         key={`${result.type}-${result.id}-${i}`}
-                        href={result.url}
+                        to={result.url}
                         onClick={() => {
                           setSearchQuery("");
                           setSearchResults([]);
@@ -262,7 +253,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {/* Role Switcher */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="hidden md:flex gap-2">
@@ -289,7 +279,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Real-time Notification Bell */}
             <DropdownMenu open={notificationPanelOpen} onOpenChange={setNotificationPanelOpen}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
@@ -304,7 +293,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     </motion.span>
                   )}
                   {!isConnected && (
-                    <span className="absolute bottom-0 right-0 w-2 h-2 bg-amber-500 rounded-full border border-background" title="Reconnecting..." />
+                    <span className="absolute bottom-0 right-0 w-2 h-2 bg-amber-500 rounded-full border border-background" />
                   )}
                 </Button>
               </DropdownMenuTrigger>
@@ -321,7 +310,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </DropdownMenu>
             
             {hasPermission('canEditPatients') && (
-              <Link href="/patients">
+              <Link to="/patients">
                 <Button className="hidden sm:flex items-center gap-2">
                   <Plus className="w-4 h-4" />
                   New Patient
@@ -331,7 +320,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-4 lg:p-6 scroll-smooth">
           <div className="max-w-7xl mx-auto">{children}</div>
         </main>

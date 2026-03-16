@@ -1003,7 +1003,7 @@ export function generateAdmissions(patients: Patient[], beds: Bed[]): Admission[
   const admissions: Admission[] = [];
   const types: Admission['type'][] = ['Emergency', 'Elective', 'Newborn', 'Transfer', 'Observation'];
   const priorities: Admission['priority'][] = ['Critical', 'High', 'Normal', 'Low'];
-  const statuses: Admission['status'][] = ['Waiting', 'Admitted', 'In Progress', 'Discharge Pending', 'Discharged', 'Cancelled'];
+  const _statuses: Admission['status'][] = ['Waiting', 'Admitted', 'In Progress', 'Discharge Pending', 'Discharged', 'Cancelled'];
   
   const admittedPatients = patients.filter(p => !['Discharged', 'Outpatient'].includes(p.status));
   
@@ -1240,7 +1240,7 @@ export function generateDocuments(patients: Patient[]): Document[] {
 export function generateInventory(): InventoryItem[] {
   const items: InventoryItem[] = [];
   const categories = ['Medical Supplies', 'Equipment', 'Pharmaceuticals', 'Office Supplies', 'Linens', 'Food Service', 'Maintenance'];
-  const statuses: InventoryItem['status'][] = ['In Stock', 'Low Stock', 'Out of Stock', 'Expired', 'On Order'];
+  const _statuses: InventoryItem['status'][] = ['In Stock', 'Low Stock', 'Out of Stock', 'Expired', 'On Order'];
   
   const inventoryNames = [
     'Surgical Gloves', 'Syringes', 'IV Catheters', 'Bandages', 'Gauze Pads',
@@ -1286,9 +1286,9 @@ export function generateInventory(): InventoryItem[] {
 
 export function generateNotifications(): Notification[] {
   const notifications: Notification[] = [];
-  const types: Notification['type'][] = ['Alert', 'Reminder', 'Info', 'Warning', 'Emergency'];
+  const _types: Notification['type'][] = ['Alert', 'Reminder', 'Info', 'Warning', 'Emergency'];
   const priorities: Notification['priority'][] = ['Low', 'Medium', 'High', 'Critical'];
-  const categories: Notification['category'][] = ['Patient', 'Appointment', 'Lab', 'Pharmacy', 'Billing', 'Emergency', 'System', 'Task'];
+  const _categories: Notification['category'][] = ['Patient', 'Appointment', 'Lab', 'Pharmacy', 'Billing', 'Emergency', 'System', 'Task'];
   
   const notificationTemplates = [
     { title: 'New Emergency Case', message: 'Critical patient incoming - ETA 5 min', category: 'Emergency', type: 'Emergency' },

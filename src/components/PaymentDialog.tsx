@@ -142,7 +142,7 @@ export default function PaymentDialog({
       } else {
         toast.error("Failed to process payment");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to process payment");
     } finally {
       setProcessing(false);

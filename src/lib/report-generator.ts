@@ -49,7 +49,7 @@ const formatDateShort = (date: string | Date): string => {
 
 // Add hospital header to PDF
 const addHospitalHeader = (doc: jsPDF, title: string): number => {
-  const pageWidth = doc.internal.pageSize.getWidth();
+  const _pageWidth = doc.internal.pageSize.getWidth();
   
   // Hospital logo area (text-based)
   doc.setFillColor(...COLORS.primary);
@@ -79,7 +79,7 @@ const addHospitalHeader = (doc: jsPDF, title: string): number => {
 
 // Add footer to PDF
 const addFooter = (doc: jsPDF, pageNumber: number, totalPages: number) => {
-  const pageWidth = doc.internal.pageSize.getWidth();
+  const _pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   
   doc.setFontSize(8);
@@ -111,8 +111,8 @@ export const generatePatientReport = (patient: Patient): jsPDF => {
   const doc = new jsPDF();
   let yPos = addHospitalHeader(doc, 'PATIENT REPORT');
   
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const contentWidth = pageWidth - 30;
+  const _pageWidth = doc.internal.pageSize.getWidth();
+  const _contentWidth = pageWidth - 30;
   
   // Report generation info
   doc.setFontSize(9);
@@ -376,7 +376,7 @@ export const generateInvoiceReport = (invoice: Invoice): jsPDF => {
   const doc = new jsPDF();
   let yPos = addHospitalHeader(doc, 'INVOICE / RECEIPT');
   
-  const pageWidth = doc.internal.pageSize.getWidth();
+  const _pageWidth = doc.internal.pageSize.getWidth();
   
   // Invoice details
   doc.setFontSize(10);
@@ -552,7 +552,7 @@ export const generateLabReport = (labOrder: LabOrder): jsPDF => {
   const doc = new jsPDF();
   let yPos = addHospitalHeader(doc, 'LABORATORY REPORT');
   
-  const pageWidth = doc.internal.pageSize.getWidth();
+  const _pageWidth = doc.internal.pageSize.getWidth();
   
   // Report info
   doc.setFontSize(9);
@@ -702,7 +702,7 @@ export const generateDashboardReport = (stats: DashboardStats, departments?: Dep
   const doc = new jsPDF();
   let yPos = addHospitalHeader(doc, 'HOSPITAL OVERVIEW REPORT');
   
-  const pageWidth = doc.internal.pageSize.getWidth();
+  const _pageWidth = doc.internal.pageSize.getWidth();
   
   // Report period
   doc.setFontSize(9);
@@ -929,7 +929,7 @@ export const generatePatientCensusReport = (patients: Patient[], dateRange?: { s
   const doc = new jsPDF('landscape');
   let yPos = addHospitalHeader(doc, 'PATIENT CENSUS REPORT');
   
-  const pageWidth = doc.internal.pageSize.getWidth();
+  const _pageWidth = doc.internal.pageSize.getWidth();
   
   // Date range
   doc.setFontSize(9);
@@ -1010,7 +1010,7 @@ export const generateRevenueReport = (invoices: Invoice[], dateRange?: { start: 
   const doc = new jsPDF('landscape');
   let yPos = addHospitalHeader(doc, 'REVENUE REPORT');
   
-  const pageWidth = doc.internal.pageSize.getWidth();
+  const _pageWidth = doc.internal.pageSize.getWidth();
   
   // Date range
   doc.setFontSize(9);
@@ -1028,7 +1028,7 @@ export const generateRevenueReport = (invoices: Invoice[], dateRange?: { start: 
   const totalOutstanding = invoices.reduce((sum, i) => sum + i.balance, 0);
   const paidCount = invoices.filter(i => i.status === 'Paid').length;
   const pendingCount = invoices.filter(i => i.status === 'Pending').length;
-  const overdueCount = invoices.filter(i => i.status === 'Overdue').length;
+  const _overdueCount = invoices.filter(i => i.status === 'Overdue').length;
   
   // Summary boxes
   const boxWidth = 55;
@@ -1112,7 +1112,7 @@ export const generateLabStatisticsReport = (labOrders: LabOrder[], dateRange?: {
   const doc = new jsPDF();
   let yPos = addHospitalHeader(doc, 'LABORATORY STATISTICS REPORT');
   
-  const pageWidth = doc.internal.pageSize.getWidth();
+  const _pageWidth = doc.internal.pageSize.getWidth();
   
   // Date range
   doc.setFontSize(9);
@@ -1239,7 +1239,7 @@ export const generateOccupancyReport = (departments: Department[]): jsPDF => {
   const doc = new jsPDF();
   let yPos = addHospitalHeader(doc, 'BED OCCUPANCY REPORT');
   
-  const pageWidth = doc.internal.pageSize.getWidth();
+  const _pageWidth = doc.internal.pageSize.getWidth();
   
   // Generated timestamp
   doc.setFontSize(9);

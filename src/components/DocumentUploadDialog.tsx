@@ -163,7 +163,7 @@ export default function DocumentUploadDialog({
       } else {
         toast.error("Failed to upload document");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to upload document");
     } finally {
       setUploading(false);
