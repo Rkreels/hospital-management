@@ -779,7 +779,7 @@ export default function NursesPage() {
                               alt={nurse.name}
                             />
                             <AvatarFallback className="bg-gradient-to-br from-rose-400 to-pink-500 text-white">
-                              {nurse.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                              {(nurse.name || '').split(' ').map(n => n[0]).join('').slice(0, 2)}
                             </AvatarFallback>
                           </Avatar>
                           <div>

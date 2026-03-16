@@ -342,7 +342,7 @@ export default function CalendarPage() {
                           className="border-r border-border/50 last:border-0 p-1 relative"
                         >
                           {events.map((event, eventIndex) => {
-                            const eventHour = parseInt(event.startTime.split(":")[0]);
+                            const eventHour = event.startTime ? parseInt(event.startTime.split(":")[0]) : 0;
                             const eventDay = eventIndex % 5;
                             if (eventDay === dayIndex && eventHour === index + 9) {
                               return (

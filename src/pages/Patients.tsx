@@ -677,7 +677,7 @@ export default function PatientsPage() {
                               <div className="flex items-center gap-3">
                                 <Avatar className="w-10 h-10">
                                   <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${patient.name}`} />
-                                  <AvatarFallback>{patient.name.split(' ').map(n => n[0]).join('').substring(0, 2)}</AvatarFallback>
+                                  <AvatarFallback>{(patient.name || '').split(' ').map(n => n[0]).join('').substring(0, 2)}</AvatarFallback>
                                 </Avatar>
                                 <div>
                                   <p className="font-medium text-foreground">{patient.name}</p>
@@ -1007,7 +1007,7 @@ export default function PatientsPage() {
                     <div className="flex items-center gap-4">
                       <Avatar className="w-16 h-16">
                         <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${viewingPatient.name}`} />
-                        <AvatarFallback className="text-xl">{viewingPatient.name.split(' ').map(n => n[0]).join('').substring(0, 2)}</AvatarFallback>
+                        <AvatarFallback className="text-xl">{(viewingPatient.name || '').split(' ').map(n => n[0]).join('').substring(0, 2)}</AvatarFallback>
                       </Avatar>
                       <div>
                         <DialogTitle className="text-xl">{viewingPatient.name}</DialogTitle>

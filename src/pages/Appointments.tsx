@@ -816,8 +816,8 @@ export default function AppointmentsPage() {
                     {weekDatesStr.map((date, dayIndex) => {
                       const dayAppointments = getAppointmentsForDate(date);
                       const slotAppointments = dayAppointments.filter((a) => {
-                        const appointmentHour = parseInt(a.time.split(":")[0]);
-                        const slotHour = parseInt(time.split(":")[0]);
+                        const appointmentHour = a.time ? parseInt(a.time.split(":")[0]) : 0;
+                        const slotHour = time ? parseInt(time.split(":")[0]) : 0;
                         return appointmentHour === slotHour;
                       });
 
@@ -877,13 +877,13 @@ export default function AppointmentsPage() {
     return (
       <Card>
         <CardContent className="p-0">
-          <div className="grid grid-cols-2 gap-0 divide-x divide-border">
+            <div className="grid grid-cols-2 gap-0 divide-x divide-border">
             {/* Time slots */}
             <div className="relative" style={{ maxHeight: "600px", overflowY: "auto" }}>
               {timeSlots.map((time) => {
                 const slotAppointments = dayAppointments.filter((a) => {
-                  const appointmentHour = parseInt(a.time.split(":")[0]);
-                  const slotHour = parseInt(time.split(":")[0]);
+                  const appointmentHour = a.time ? parseInt(a.time.split(":")[0]) : 0;
+                  const slotHour = time ? parseInt(time.split(":")[0]) : 0;
                   return appointmentHour === slotHour;
                 });
 

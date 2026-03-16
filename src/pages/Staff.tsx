@@ -685,7 +685,7 @@ export default function StaffManagementPage() {
                               <div className="flex items-center gap-3">
                                 <Avatar className="w-10 h-10">
                                   <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${staff.name}`} />
-                                  <AvatarFallback>{staff.name.split(' ').map(n => n[0]).join('').substring(0, 2)}</AvatarFallback>
+                                  <AvatarFallback>{(staff.name || '').split(' ').map(n => n[0]).join('').substring(0, 2)}</AvatarFallback>
                                 </Avatar>
                                 <div>
                                   <p className="font-medium">{staff.name}</p>
@@ -797,7 +797,7 @@ export default function StaffManagementPage() {
                               <div className="flex items-center gap-3">
                                 <Avatar className="w-8 h-8">
                                   <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${leave.staffName}`} />
-                                  <AvatarFallback>{leave.staffName.split(' ').map(n => n[0]).join('').substring(0, 2)}</AvatarFallback>
+                                  <AvatarFallback>{(leave.staffName || '').split(' ').map(n => n[0]).join('').substring(0, 2)}</AvatarFallback>
                                 </Avatar>
                                 <span className="font-medium">{leave.staffName}</span>
                               </div>
@@ -1160,7 +1160,7 @@ export default function StaffManagementPage() {
                 <div className="flex items-center gap-4">
                   <Avatar className="w-20 h-20">
                     <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${viewingStaff.name}`} />
-                    <AvatarFallback className="text-2xl">{viewingStaff.name.split(' ').map(n => n[0]).join('').substring(0, 2)}</AvatarFallback>
+                    <AvatarFallback className="text-2xl">{(viewingStaff.name || '').split(' ').map(n => n[0]).join('').substring(0, 2)}</AvatarFallback>
                   </Avatar>
                   <div>
                     <h3 className="text-2xl font-bold">{viewingStaff.name}</h3>
