@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/hospital-management/:path*", "destination": "/hospital-management/index.html" }
+  ]
+}
