@@ -146,9 +146,9 @@ const generatePDFReport = async (type: string, data: unknown) => {
       let yPos = addHospitalHeader(doc, 'REVENUE REPORT');
       const _pageWidth = doc.internal.pageSize.getWidth();
       
-      const totalRevenue = invoices.reduce((sum, i) => sum + i.total, 0);
-      const totalPaid = invoices.reduce((sum, i) => sum + i.paidAmount, 0);
-      const totalOutstanding = invoices.reduce((sum, i) => sum + i.balance, 0);
+      const totalRevenue = (invoices || []).reduce((sum, i) => sum + (i.total || 0), 0);
+      const totalPaid = (invoices || []).reduce((sum, i) => sum + (i.paidAmount || 0), 0);
+      const totalOutstanding = (invoices || []).reduce((sum, i) => sum + (i.balance || 0), 0);
       
       doc.setFontSize(9);
       doc.setTextColor(107, 114, 128);
@@ -272,8 +272,8 @@ const generatePDFReport = async (type: string, data: unknown) => {
       let yPos = addHospitalHeader(doc, 'BED OCCUPANCY REPORT');
       const _pageWidth = doc.internal.pageSize.getWidth();
       
-      const totalBeds = departments.reduce((sum, d) => sum + d.beds, 0);
-      const totalOccupied = departments.reduce((sum, d) => sum + d.occupiedBeds, 0);
+      const totalBeds = (departments || []).reduce((sum, d) => sum + (d.beds || 0), 0);
+      const totalOccupied = (departments || []).reduce((sum, d) => sum + (d.occupiedBeds || 0), 0);
       const overallOccupancy = Math.round((totalOccupied / totalBeds) * 100);
       
       doc.setFontSize(9);
@@ -527,7 +527,7 @@ const _dateRangeOptions = [
 
 // Simple Bar Chart Component
 const SimpleBarChart: React.FC<{ data: { label: string; value: number }[]; height?: number; color?: string }> = ({ data, height = 200, color = "#3b82f6" }) => {
-  const maxValue = Math.max(...data.map(d => d.value), 1);
+  const maxValue = (data?.length ?? 0) > 0 ? Math.max(...(data || []).map(d => d.value), 1) : 1;
   return (
     <div className="w-full" style={{ height }}>
       <div className="flex items-end justify-between h-full gap-2 px-2">
@@ -544,12 +544,12 @@ const SimpleBarChart: React.FC<{ data: { label: string; value: number }[]; heigh
 
 // Simple Line Chart Component
 const SimpleLineChart: React.FC<{ data: { label: string; value: number }[]; height?: number; color?: string; showDots?: boolean }> = ({ data, height = 200, color = "#10b981", showDots = true }) => {
-  const maxValue = Math.max(...data.map(d => d.value), 1);
-  const minValue = Math.min(...data.map(d => d.value), 0);
+  const maxValue = (data?.length ?? 0) > 0 ? Math.max(...(data || []).map(d => d.value), 1) : 1;
+  const minValue = (data?.length ?? 0) > 0 ? Math.min(...(data || []).map(d => d.value), 0) : 0;
   const range = maxValue - minValue || 1;
   const width = 100;
-  const pointSpacing = width / (data.length - 1 || 1);
-  const points = data.map((item, index) => ({ x: index * pointSpacing, y: height - ((item.value - minValue) / range) * (height - 40) - 20, value: item.value, label: item.label }));
+  const pointSpacing = width / ((data || []).length - 1 || 1);
+  const points = (data || []).map((item, index) => ({ x: index * pointSpacing, y: height - ((item.value - minValue) / range) * (height - 40) - 20, value: item.value, label: item.label }));
   const pathD = points.reduce((acc, point, index) => index === 0 ? `M ${point.x} ${point.y}` : `${acc} L ${point.x} ${point.y}`, "");
   const areaD = `${pathD} L ${points[points.length - 1]?.x || 0} ${height - 10} L ${points[0]?.x || 0} ${height - 10} Z`;
 
@@ -566,7 +566,7 @@ const SimpleLineChart: React.FC<{ data: { label: string; value: number }[]; heig
 
 // Simple Pie Chart Component
 const SimplePieChart: React.FC<{ data: { label: string; value: number; color?: string }[]; size?: number }> = ({ data, size = 160 }) => {
-  const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
+  const total = (data || []).reduce((sum, item) => sum + (item.value || 0), 0) || 1;
   const radius = size / 2 - 10;
   const center = size / 2;
   const defaultColors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
@@ -629,7 +629,7 @@ export default function ReportsPage() {
   const fetchReportData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const stats = db.getDashboardStats();
+      const stats = db.getDashboardStats() || {};
       const patientsData = db.getPatients() || [];
       const invoicesData = db.getInvoices() || [];
       const departmentsData = db.getDepartments() || [];
@@ -653,10 +653,10 @@ export default function ReportsPage() {
       const statusCounts: Record<string, number> = {};
       patientsData.forEach(p => { statusCounts[p.status] = (statusCounts[p.status] || 0) + 1; });
       const byStatus = Object.entries(statusCounts).map(([label, count]) => ({ label, count }));
-      const paidInvoices = invoicesData.filter(i => i.status === "Paid");
-      const pendingInvoices = invoicesData.filter(i => i.status === "Pending" || i.status === "Overdue");
-      const totalRevenue = paidInvoices.reduce((sum, i) => sum + i.total, 0);
-      const totalOutstanding = pendingInvoices.reduce((sum, i) => sum + i.outstandingAmount, 0);
+      const paidInvoices = (invoicesData || []).filter(i => i.status === "Paid");
+      const pendingInvoices = (invoicesData || []).filter(i => i.status === "Pending" || i.status === "Overdue");
+      const totalRevenue = (paidInvoices || []).reduce((sum, i) => sum + (i.total || 0), 0);
+      const totalOutstanding = (pendingInvoices || []).reduce((sum, i) => sum + (i.outstandingAmount || 0), 0);
       const deptOccupancy = departmentsData.map(d => ({ name: d.name, occupancy: Math.round((d.occupiedBeds / d.beds) * 100), total: d.beds, occupied: d.occupiedBeds }));
       const lowStockMeds = medicationsData.filter(m => m.stock < m.reorderLevel);
       const expiringMeds = medicationsData.filter(m => { const expiryDate = new Date(m.expiryDate); const threeMonthsFromNow = new Date(); threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3); return expiryDate < threeMonthsFromNow; });

@@ -312,8 +312,8 @@ export default function StaffManagementPage() {
   const handleUpdateStaff = async () => {
     if (!editingStaff) return;
     try {
-      const isDoctor = db.getDoctors().some(d => d.id === editingStaff.id);
-      const isNurse = db.getNurses().some(n => n.id === editingStaff.id);
+      const isDoctor = (db.getDoctors() || []).some(d => d.id === editingStaff.id);
+      const isNurse = (db.getNurses() || []).some(n => n.id === editingStaff.id);
       
       if (isDoctor) {
         const updated = db.updateDoctor(editingStaff.id, {
@@ -353,8 +353,8 @@ export default function StaffManagementPage() {
   const handleDeleteStaff = async (id: string) => {
     if (!confirm("Are you sure you want to delete this staff member?")) return;
     try {
-      const isDoctor = db.getDoctors().some(d => d.id === id);
-      const isNurse = db.getNurses().some(n => n.id === id);
+      const isDoctor = (db.getDoctors() || []).some(d => d.id === id);
+      const isNurse = (db.getNurses() || []).some(n => n.id === id);
       
       let deleted = false;
       if (isDoctor) {

@@ -66,7 +66,7 @@ export default function TasksPage() {
 
   const fetchTasks = async () => {
     try {
-      const data = db.getTasks();
+      const data = db.getTasks() || [];
       setTasks(data);
     } catch {
       toast.error("Failed to fetch tasks");

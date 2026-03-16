@@ -213,7 +213,7 @@ export default function PatientsPage() {
 
   const fetchPatientDetails = async (id: string) => {
     try {
-      const data = db.getPatients()
+      const data = db.getPatients() || []
       return data;
     } catch {
       toast.error("Failed to fetch patient details");
@@ -347,7 +347,7 @@ export default function PatientsPage() {
   const handleRemoveAllergy = async (allergyId: string) => {
     if (!viewingPatient) return;
     try {
-      const updatedAllergies = viewingPatient.allergies.filter(a => a.id !== allergyId);
+      const updatedAllergies = (viewingPatient.allergies || []).filter(a => a.id !== allergyId);
       const updated = db.updatePatient(viewingPatient.id, { allergies: updatedAllergies });
       if (updated) {
         toast.success("Allergy removed successfully");
@@ -391,7 +391,7 @@ export default function PatientsPage() {
   const handleDiscontinueMedication = async (medicationId: string) => {
     if (!viewingPatient) return;
     try {
-      const updatedMedications = viewingPatient.currentMedications.map(m => 
+      const updatedMedications = (viewingPatient.currentMedications || []).map(m => 
         m.id === medicationId ? { ...m, status: 'Discontinued' as const, endDate: new Date().toISOString().split('T')[0] } : m
       );
       const updated = db.updatePatient(viewingPatient.id, { currentMedications: updatedMedications });
@@ -415,7 +415,7 @@ export default function PatientsPage() {
     setEditingPatient(patient);
     setFormData({
       name: patient.name,
-      age: patient.age.toString(),
+      age: (patient.age || '').toString(),
       gender: patient.gender,
       dateOfBirth: patient.dateOfBirth || "",
       bloodGroup: patient.bloodType || "",
@@ -449,7 +449,7 @@ export default function PatientsPage() {
   // Get unique wards for filter
   const wards = useMemo(() => {
     if (!patients || !Array.isArray(patients)) return [];
-    const uniqueWards = [...new Set(patients.map(p => p.ward).filter(Boolean))];
+    const uniqueWards = [...new Set((patients || []).map(p => p.ward || '').filter(Boolean))];
     return uniqueWards.sort();
   }, [patients]);
 
@@ -641,7 +641,7 @@ export default function PatientsPage() {
                             <td className="px-6 py-4 font-mono text-sm">{patient.mrn}</td>
                             <td className="px-6 py-4">
                               <Badge
-                                className={`${statusConfig[patient.status].bgColor} ${statusConfig[patient.status].color} ${statusConfig[patient.status].borderColor} border`}
+                                className={`${statusConfig[patient?.status]?.bgColor || 'bg-gray-100'} ${statusConfig[patient?.status]?.color || 'text-gray-800'} ${statusConfig[patient?.status]?.borderColor || 'border-gray-300'} border`}
                               >
                                 {patient.status}
                               </Badge>
@@ -980,7 +980,7 @@ export default function PatientsPage() {
                         </div>
                       </div>
                     </div>
-                    <Badge className={`${statusConfig[viewingPatient.status].bgColor} ${statusConfig[viewingPatient.status].color} ${statusConfig[viewingPatient.status].borderColor} border text-sm px-3 py-1`}>
+                    <Badge className={`${statusConfig[viewingPatient?.status]?.bgColor || 'bg-gray-100'} ${statusConfig[viewingPatient?.status]?.color || 'text-gray-800'} ${statusConfig[viewingPatient?.status]?.borderColor || 'border-gray-300'} border text-sm px-3 py-1`}>
                       {viewingPatient.status}
                     </Badge>
                   </div>
@@ -1036,11 +1036,11 @@ export default function PatientsPage() {
                       </div>
 
                       {/* Secondary Diagnoses */}
-                      {viewingPatient.secondaryDiagnoses && viewingPatient.secondaryDiagnoses.length > 0 && (
+                      {(viewingPatient.secondaryDiagnoses || []).length > 0 && (
                         <Card className="p-4">
                           <h4 className="font-medium mb-3">Secondary Diagnoses</h4>
                           <div className="flex flex-wrap gap-2">
-                            {viewingPatient.secondaryDiagnoses.map((diag, idx) => (
+                            {(viewingPatient.secondaryDiagnoses || []).map((diag, idx) => (
                               <Badge key={idx} variant="outline">{diag}</Badge>
                             ))}
                           </div>
@@ -1069,14 +1069,14 @@ export default function PatientsPage() {
                       </Card>
 
                       {/* Emergency Contacts */}
-                      {viewingPatient.emergencyContacts && viewingPatient.emergencyContacts.length > 0 && (
+                      {(viewingPatient.emergencyContacts || []).length > 0 && (
                         <Card className="p-4 border-orange-200 bg-orange-50/50">
                           <h4 className="font-medium mb-3 flex items-center gap-2">
                             <AlertTriangle className="w-4 h-4 text-orange-500" />
                             Emergency Contacts
                           </h4>
                           <div className="space-y-3">
-                            {viewingPatient.emergencyContacts.map((contact) => (
+                            {(viewingPatient.emergencyContacts || []).map((contact) => (
                               <div key={contact.id} className="flex items-center justify-between text-sm">
                                 <div className="flex items-center gap-4">
                                   <span className="font-medium">{contact.name}</span>

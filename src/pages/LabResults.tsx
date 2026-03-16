@@ -192,18 +192,18 @@ export default function LabResultsPage() {
   // Refresh orders
   const refreshOrders = useCallback(async () => {
     try {
-      const data = db.getLabOrders();
+      const data = db.getLabOrders() || [];
       setLabOrders(data);
       
       // Recalculate stats
       const today = new Date().toISOString().split("T")[0];
       setStats({
-        pending: data.filter((o: LabOrder) => o.status !== "Completed" && o.status !== "Cancelled").length,
-        todayOrders: data.filter((o: LabOrder) => o.createdAt?.split("T")[0] === today).length,
-        completedToday: data.filter((o: LabOrder) => o.status === "Completed" && o.reportReadyAt?.split("T")[0] === today).length,
-        criticalResults: data.filter((o: LabOrder) => 
-          o.tests?.some((t: LabOrderTest) => 
-            t.results?.some((r: { flag?: string }) => r.flag?.includes("Critical"))
+        pending: (data || []).filter((o: LabOrder) => o.status !== "Completed" && o.status !== "Cancelled").length,
+        todayOrders: (data || []).filter((o: LabOrder) => (o.createdAt || '').split("T")[0] === today).length,
+        completedToday: (data || []).filter((o: LabOrder) => o.status === "Completed" && (o.reportReadyAt || '').split("T")[0] === today).length,
+        criticalResults: (data || []).filter((o: LabOrder) => 
+          (o.tests || []).some((t: LabOrderTest) => 
+            (t.results || []).some((r: { flag?: string }) => (r.flag || '').includes("Critical"))
           )
         ).length,
       });

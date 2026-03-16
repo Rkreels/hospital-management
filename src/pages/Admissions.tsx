@@ -28,17 +28,17 @@ export default function AdmissionsPage() {
 
   const fetchAdmissions = async () => {
     try {
-      const data = db.getAdmissions();
+      const data = db.getAdmissions() || [];
       setAdmissions(data);
     } catch {
       console.error("Failed to fetch admissions");
     }
   };
 
-  const filteredAdmissions = admissions.filter(
+  const filteredAdmissions = (admissions || []).filter(
     (a) =>
-      a.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.type.toLowerCase().includes(searchQuery.toLowerCase())
+      (a.patientName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (a.type || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getPriorityColor = (priority: string) => {

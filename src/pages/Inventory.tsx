@@ -130,11 +130,11 @@ export default function InventoryPage() {
 
   // Calculate summary statistics
   const stats = useMemo(() => {
-    const totalItems = inventory.length;
-    const totalValue = inventory.reduce((sum, item) => sum + item.totalValue, 0);
-    const lowStockItems = inventory.filter(item => item.status === 'Low Stock').length;
-    const outOfStockItems = inventory.filter(item => item.status === 'Out of Stock').length;
-    const expiredItems = inventory.filter(item => item.status === 'Expired').length;
+    const totalItems = (inventory || []).length;
+    const totalValue = (inventory || []).reduce((sum, item) => sum + (item.totalValue || 0), 0);
+    const lowStockItems = (inventory || []).filter(item => item.status === 'Low Stock').length;
+    const outOfStockItems = (inventory || []).filter(item => item.status === 'Out of Stock').length;
+    const expiredItems = (inventory || []).filter(item => item.status === 'Expired').length;
     
     return { totalItems, totalValue, lowStockItems, outOfStockItems, expiredItems };
   }, [inventory]);
@@ -199,7 +199,7 @@ export default function InventoryPage() {
   // Open update dialog
   const openUpdateDialog = (item: InventoryItem) => {
     setSelectedItem(item);
-    setUpdateQuantity(item.quantity.toString());
+    setUpdateQuantity((item.quantity || 0).toString());
     setUpdateReason("");
     setIsUpdateDialogOpen(true);
   };

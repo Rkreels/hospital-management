@@ -233,12 +233,11 @@ export default function BillingPage() {
       const paymentsData = db.getPayments();
       const patientsData = db.getPatients();
 
-      setInvoices(invoicesData);
-      setPayments(paymentsData);
-      // Mock insurance claims and payment plans since they don't exist in store
+      setInvoices(invoicesData || []);
+      setPayments(paymentsData || []);
       setInsuranceClaims([]);
       setPaymentPlans([]);
-      setPatients(patientsData.map((p: Patient) => ({
+      setPatients((patientsData || []).map((p: Patient) => ({
         id: p.id,
         name: p.name,
         mrn: p.mrn,
@@ -288,7 +287,7 @@ export default function BillingPage() {
   }, [invoices, quickFilter, searchQuery]);
 
   // Summary statistics
-  const stats = useMemo(() => {
+  const safeStats = useMemo(() => {
     const invoiceList = invoices || [];
     const pending = invoiceList.filter(i => i.status === 'Pending').reduce((sum, i) => sum + (i.outstandingAmount || 0), 0);
     const overdue = invoiceList.filter(i => i.status === 'Overdue').reduce((sum, i) => sum + (i.outstandingAmount || 0), 0);
@@ -313,7 +312,7 @@ export default function BillingPage() {
   // Invoice CRUD operations
   const handleCreateInvoice = async () => {
     try {
-      const subtotal = invoiceForm.services.reduce((sum, s) => sum + s.total, 0);
+      const subtotal = (invoiceForm?.services || []).reduce((sum, s) => sum + s.total, 0);
       const discount = invoiceForm.discount;
       const tax = subtotal * 0.08;
       const total = subtotal - discount + tax;
@@ -347,7 +346,7 @@ export default function BillingPage() {
   const handleUpdateInvoice = async () => {
     if (!editingInvoice) return;
     try {
-      const subtotal = invoiceForm.services.reduce((sum, s) => sum + s.total, 0);
+      const subtotal = (invoiceForm?.services || []).reduce((sum, s) => sum + s.total, 0);
       const discount = invoiceForm.discount;
       const tax = subtotal * 0.08;
       const total = subtotal - discount + tax;
@@ -466,19 +465,19 @@ export default function BillingPage() {
   // Export CSV
   const handleExportCSV = () => {
     const headers = ['Invoice Number', 'Patient Name', 'MRN', 'Date', 'Due Date', 'Subtotal', 'Discount', 'Tax', 'Total', 'Paid', 'Outstanding', 'Status'];
-    const rows = filteredInvoices.map(inv => [
-      inv.invoiceNumber,
-      inv.patientName,
+    const rows = (filteredInvoices || []).map(inv => [
+      inv.invoiceNumber || '',
+      inv.patientName || '',
       inv.patientMrn || '',
-      inv.date,
-      inv.dueDate,
-      inv.subtotal.toFixed(2),
-      inv.discount.toFixed(2),
-      inv.tax.toFixed(2),
-      inv.total.toFixed(2),
-      inv.paidAmount.toFixed(2),
-      inv.outstandingAmount.toFixed(2),
-      inv.status,
+      inv.date || '',
+      inv.dueDate || '',
+      (inv.subtotal || 0).toFixed(2),
+      (inv.discount || 0).toFixed(2),
+      (inv.tax || 0).toFixed(2),
+      (inv.total || 0).toFixed(2),
+      (inv.paidAmount || 0).toFixed(2),
+      (inv.outstandingAmount || 0).toFixed(2),
+      inv.status || '',
     ]);
 
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -561,7 +560,7 @@ export default function BillingPage() {
   const canApprove = currentRole === 'admin' || currentRole === 'billing';
 
   // Calculate max height for chart bars
-  const maxRevenue = revenueData?.length > 0 ? Math.max(...revenueData.map(d => d.revenue)) : 1;
+  const maxRevenue = (revenueData?.length ?? 0) > 0 ? Math.max(...(revenueData || []).map(d => d.revenue)) : 1;
 
   return (
     <div className="space-y-6">
@@ -601,8 +600,8 @@ export default function BillingPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Pending</p>
-                <p className="text-xl font-bold">{stats.pendingCount}</p>
-                <p className="text-xs text-muted-foreground">${stats.pendingAmount.toLocaleString()}</p>
+                <p className="text-xl font-bold">{safeStats.pendingCount}</p>
+                <p className="text-xs text-muted-foreground">${safeStats.pendingAmount.toLocaleString()}</p>
               </div>
             </div>
           </Card>
@@ -613,8 +612,8 @@ export default function BillingPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Overdue</p>
-                <p className="text-xl font-bold">{stats.overdueCount}</p>
-                <p className="text-xs text-muted-foreground">${stats.overdueAmount.toLocaleString()}</p>
+                <p className="text-xl font-bold">{safeStats.overdueCount}</p>
+                <p className="text-xs text-muted-foreground">${safeStats.overdueAmount.toLocaleString()}</p>
               </div>
             </div>
           </Card>
@@ -625,8 +624,8 @@ export default function BillingPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Paid</p>
-                <p className="text-xl font-bold">{stats.paidCount}</p>
-                <p className="text-xs text-muted-foreground">${stats.paidAmount.toLocaleString()}</p>
+                <p className="text-xl font-bold">{safeStats.paidCount}</p>
+                <p className="text-xs text-muted-foreground">${safeStats.paidAmount.toLocaleString()}</p>
               </div>
             </div>
           </Card>
@@ -637,8 +636,8 @@ export default function BillingPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Insurance</p>
-                <p className="text-xl font-bold">{stats.insuranceCount}</p>
-                <p className="text-xs text-muted-foreground">${stats.insuranceAmount.toLocaleString()}</p>
+                <p className="text-xl font-bold">{safeStats.insuranceCount}</p>
+                <p className="text-xs text-muted-foreground">${safeStats.insuranceAmount.toLocaleString()}</p>
               </div>
             </div>
           </Card>
@@ -649,7 +648,7 @@ export default function BillingPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Outstanding</p>
-                <p className="text-xl font-bold">${stats.totalOutstanding.toLocaleString()}</p>
+                <p className="text-xl font-bold">${safeStats.totalOutstanding.toLocaleString()}</p>
               </div>
             </div>
           </Card>
@@ -662,18 +661,18 @@ export default function BillingPage() {
           </CardHeader>
           <CardContent className="p-0">
             <div className="flex items-end gap-4 h-48">
-              {revenueData.map((data, i) => (
+              {(revenueData || []).map((data, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center gap-2">
                   <div className="w-full flex gap-1 items-end h-36">
                     <div
                       className="flex-1 bg-primary/20 rounded-t transition-all duration-300 hover:bg-primary/30"
                       style={{ height: `${(data.revenue / maxRevenue) * 100}%` }}
-                      title={`Billed: $${data.revenue.toLocaleString()}`}
+                      title={`Billed: $${(data.revenue || 0).toLocaleString()}`}
                     />
                     <div
                       className="flex-1 bg-green-500/60 rounded-t transition-all duration-300 hover:bg-green-500/70"
-                      style={{ height: `${(data.collected / maxRevenue) * 100}%` }}
-                      title={`Collected: $${data.collected.toLocaleString()}`}
+                      style={{ height: `${((data.collected || 0) / maxRevenue) * 100}%` }}
+                      title={`Collected: $${(data.collected || 0).toLocaleString()}`}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground text-center">{data.month}</p>
@@ -788,13 +787,13 @@ export default function BillingPage() {
                             <td className="px-6 py-4">{inv.date}</td>
                             <td className="px-6 py-4">{inv.dueDate}</td>
                             <td className="px-6 py-4 text-right font-medium">
-                              ${inv.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              ${(inv.total || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </td>
                             <td className="px-6 py-4 text-right text-green-600">
-                              ${inv.paidAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              ${(inv.paidAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </td>
                             <td className="px-6 py-4 text-right text-amber-600">
-                              ${inv.outstandingAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              ${(inv.outstandingAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </td>
                             <td className="px-6 py-4">
                               <Badge variant={getStatusColor(inv.status) as "success" | "warning" | "destructive" | "info" | "secondary"}>
@@ -825,7 +824,7 @@ export default function BillingPage() {
                                         setInvoiceForm({
                                           patientId: inv.patientId,
                                           patientName: inv.patientName,
-                                          services: inv.services,
+                                          services: inv.services || [],
                                           discount: inv.discount,
                                           discountReason: inv.discountReason || '',
                                           notes: inv.notes || '',
@@ -921,16 +920,16 @@ export default function BillingPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
-                        {payments.filter(p =>
-                          searchQuery ? p.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            p.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase()) : true
+                        {(payments || []).filter(p =>
+                          searchQuery ? (p.patientName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            (p.invoiceNumber || '').toLowerCase().includes(searchQuery.toLowerCase()) : true
                         ).map((payment) => (
                           <tr key={payment.id} className="hover:bg-muted/30 transition-colors">
                             <td className="px-6 py-4 font-medium">{payment.id}</td>
                             <td className="px-6 py-4">{payment.invoiceNumber}</td>
                             <td className="px-6 py-4">{payment.patientName}</td>
                             <td className="px-6 py-4 font-bold text-green-600">
-                              ${payment.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              ${(payment.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </td>
                             <td className="px-6 py-4">
                               <Badge variant="outline">{payment.method}</Badge>
@@ -940,7 +939,7 @@ export default function BillingPage() {
                                 {payment.status}
                               </Badge>
                             </td>
-                            <td className="px-6 py-4">{payment.processedAt?.split('T')[0]}</td>
+                            <td className="px-6 py-4">{payment.processedAt?.split('T')[0] || '-'}</td>
                             <td className="px-6 py-4">{payment.processedBy}</td>
                           </tr>
                         ))}
@@ -981,19 +980,19 @@ export default function BillingPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
-                        {insuranceClaims.filter(c =>
-                          searchQuery ? c.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            c.claimNumber.toLowerCase().includes(searchQuery.toLowerCase()) : true
+                        {(insuranceClaims || []).filter(c =>
+                          searchQuery ? (c.patientName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            (c.claimNumber || '').toLowerCase().includes(searchQuery.toLowerCase()) : true
                         ).map((claim) => (
                           <tr key={claim.id} className="hover:bg-muted/30 transition-colors">
                             <td className="px-6 py-4 font-medium">{claim.claimNumber}</td>
                             <td className="px-6 py-4">{claim.patientName}</td>
                             <td className="px-6 py-4">{claim.insuranceProvider}</td>
                             <td className="px-6 py-4">
-                              ${claim.claimAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              ${(claim.claimAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </td>
                             <td className="px-6 py-4 text-green-600">
-                              {claim.approvedAmount ? `$${claim.approvedAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '-'}
+                              {claim.approvedAmount ? `$${(claim.approvedAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '-'}
                             </td>
                             <td className="px-6 py-4">
                               <Badge variant={getClaimStatusColor(claim.status) as "success" | "warning" | "destructive" | "info" | "secondary"}>
@@ -1090,11 +1089,11 @@ export default function BillingPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
-                        {paymentPlans.filter(p =>
-                          searchQuery ? p.patientName.toLowerCase().includes(searchQuery.toLowerCase()) : true
+                        {(paymentPlans || []).filter(p =>
+                          searchQuery ? (p.patientName || '').toLowerCase().includes(searchQuery.toLowerCase()) : true
                         ).map((plan) => {
-                          const paidInstallments = plan.installments.filter(i => i.status === 'Paid').length;
-                          const paidAmount = plan.installments.filter(i => i.status === 'Paid').reduce((sum, i) => sum + i.amount, 0);
+                          const paidInstallments = (plan.installments || []).filter(i => i.status === 'Paid').length;
+                          const paidAmount = (plan.installments || []).filter(i => i.status === 'Paid').reduce((sum, i) => sum + i.amount, 0);
                           const remaining = plan.totalAmount - paidAmount;
                           
                           return (
@@ -1102,17 +1101,17 @@ export default function BillingPage() {
                               <td className="px-6 py-4 font-medium">{plan.id}</td>
                               <td className="px-6 py-4">{plan.patientName}</td>
                               <td className="px-6 py-4 font-medium">
-                                ${plan.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                ${(plan.totalAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                               </td>
                               <td className="px-6 py-4">
                                 <span className="text-green-600 font-medium">{paidInstallments}</span>
-                                <span className="text-muted-foreground"> / {plan.installments.length}</span>
+                                <span className="text-muted-foreground"> / {(plan.installments || []).length}</span>
                               </td>
                               <td className="px-6 py-4 text-green-600">
-                                ${paidAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                ${(paidAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                               </td>
                               <td className="px-6 py-4 text-amber-600">
-                                ${remaining.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                ${(remaining || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                               </td>
                               <td className="px-6 py-4">
                                 <Badge variant={getPlanStatusColor(plan.status) as "success" | "warning" | "destructive" | "info" | "secondary"}>
@@ -1140,7 +1139,7 @@ export default function BillingPage() {
                                             setSelectedInvoiceForPayment(inv);
                                             setPaymentForm(prev => ({
                                               ...prev,
-                                              amount: plan.installments.find(i => i.status === 'Pending')?.amount || 0,
+                                              amount: (plan.installments || []).find(i => i.status === 'Pending')?.amount || 0,
                                             }));
                                             setIsPaymentDialogOpen(true);
                                           }
@@ -1278,16 +1277,16 @@ export default function BillingPage() {
                 </div>
 
                 {/* Services List */}
-                {invoiceForm.services.length > 0 && (
+                {(invoiceForm?.services || []).length > 0 && (
                   <div className="border rounded-lg divide-y">
-                    {invoiceForm.services.map((service) => (
+                    {invoiceForm?.services.map((service) => (
                       <div key={service.id} className="flex items-center justify-between p-3 text-sm">
                         <div className="flex-1">
                           <p className="font-medium">{service.description}</p>
                           <p className="text-xs text-muted-foreground">{service.category} × {service.quantity}</p>
                         </div>
                         <div className="flex items-center gap-4">
-                          <p className="font-medium">${service.total.toFixed(2)}</p>
+                          <p className="font-medium">${(service.total || 0).toFixed(2)}</p>
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeServiceFromInvoice(service.id)}>
                             <X className="w-4 h-4" />
                           </Button>
@@ -1333,20 +1332,20 @@ export default function BillingPage() {
               <div className="bg-muted/30 p-4 rounded-lg space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Subtotal</span>
-                  <span>${invoiceForm.services.reduce((sum, s) => sum + s.total, 0).toFixed(2)}</span>
+                  <span>${((invoiceForm?.services || []).reduce((sum, s) => sum + (s.total || 0), 0)).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Discount</span>
-                  <span className="text-red-600">-${invoiceForm.discount.toFixed(2)}</span>
+                  <span className="text-red-600">-${(invoiceForm.discount || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Tax (8%)</span>
-                  <span>${(invoiceForm.services.reduce((sum, s) => sum + s.total, 0) * 0.08).toFixed(2)}</span>
+                  <span>${(((invoiceForm?.services || []).reduce((sum, s) => sum + (s.total || 0), 0)) * 0.08).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold pt-2 border-t">
                   <span>Total</span>
                   <span>
-                    ${(invoiceForm.services.reduce((sum, s) => sum + s.total, 0) - invoiceForm.discount + invoiceForm.services.reduce((sum, s) => sum + s.total, 0) * 0.08).toFixed(2)}
+                    ${((invoiceForm?.services || []).reduce((sum, s) => sum + (s.total || 0), 0) - (invoiceForm.discount || 0) + ((invoiceForm?.services || []).reduce((sum, s) => sum + (s.total || 0), 0)) * 0.08).toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -1371,45 +1370,45 @@ export default function BillingPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-muted-foreground text-xs">Invoice Number</Label>
-                    <p className="font-medium">{viewingInvoice.invoiceNumber}</p>
+                    <p className="font-medium">{viewingInvoice?.invoiceNumber}</p>
                   </div>
                   <div>
                     <Label className="text-muted-foreground text-xs">Patient</Label>
-                    <p className="font-medium">{viewingInvoice.patientName}</p>
-                    {viewingInvoice.patientMrn && (
-                      <p className="text-xs text-muted-foreground">{viewingInvoice.patientMrn}</p>
+                    <p className="font-medium">{viewingInvoice?.patientName}</p>
+                    {viewingInvoice?.patientMrn && (
+                      <p className="text-xs text-muted-foreground">{viewingInvoice?.patientMrn}</p>
                     )}
                   </div>
                   <div>
                     <Label className="text-muted-foreground text-xs">Date</Label>
-                    <p className="font-medium">{viewingInvoice.date}</p>
+                    <p className="font-medium">{viewingInvoice?.date}</p>
                   </div>
                   <div>
                     <Label className="text-muted-foreground text-xs">Due Date</Label>
-                    <p className="font-medium">{viewingInvoice.dueDate}</p>
+                    <p className="font-medium">{viewingInvoice?.dueDate}</p>
                   </div>
                   <div>
                     <Label className="text-muted-foreground text-xs">Status</Label>
-                    <Badge variant={getStatusColor(viewingInvoice.status) as "success" | "warning" | "destructive" | "info" | "secondary"}>
-                      {viewingInvoice.status}
+                    <Badge variant={getStatusColor(viewingInvoice?.status) as "success" | "warning" | "destructive" | "info" | "secondary"}>
+                      {viewingInvoice?.status}
                     </Badge>
                   </div>
                   <div>
                     <Label className="text-muted-foreground text-xs">Created By</Label>
-                    <p className="font-medium">{viewingInvoice.createdBy}</p>
+                    <p className="font-medium">{viewingInvoice?.createdBy}</p>
                   </div>
                 </div>
                 
                 <div>
                   <Label className="text-muted-foreground text-xs mb-2 block">Services</Label>
                   <div className="border rounded-lg divide-y">
-                    {viewingInvoice.services.map((service) => (
+                    {(viewingInvoice?.services || []).map((service) => (
                       <div key={service.id} className="flex justify-between p-3 text-sm">
                         <div>
                           <p className="font-medium">{service.description}</p>
-                          <p className="text-xs text-muted-foreground">{service.category} × {service.quantity} @ ${service.unitPrice.toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">{service.category} × {service.quantity} @ ${(service.unitPrice || 0).toFixed(2)}</p>
                         </div>
-                        <p className="font-medium">${service.total.toFixed(2)}</p>
+                        <p className="font-medium">${(service.total || 0).toFixed(2)}</p>
                       </div>
                     ))}
                   </div>
@@ -1418,29 +1417,29 @@ export default function BillingPage() {
                 <div className="bg-muted/30 p-4 rounded-lg space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Subtotal</span>
-                    <span>${viewingInvoice.subtotal.toFixed(2)}</span>
+                    <span>${(viewingInvoice?.subtotal || 0).toFixed(2)}</span>
                   </div>
-                  {viewingInvoice.discount > 0 && (
+                  {viewingInvoice?.discount > 0 && (
                     <div className="flex justify-between text-sm">
-                      <span>Discount {viewingInvoice.discountReason && `(${viewingInvoice.discountReason})`}</span>
-                      <span className="text-red-600">-${viewingInvoice.discount.toFixed(2)}</span>
+                      <span>Discount {viewingInvoice?.discountReason && `(${viewingInvoice?.discountReason})`}</span>
+                      <span className="text-red-600">-${(viewingInvoice?.discount || 0).toFixed(2)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm">
                     <span>Tax</span>
-                    <span>${viewingInvoice.tax.toFixed(2)}</span>
+                    <span>${(viewingInvoice?.tax || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
                     <span>Total</span>
-                    <span>${viewingInvoice.total.toFixed(2)}</span>
+                    <span>${(viewingInvoice?.total || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-green-600">
                     <span>Paid</span>
-                    <span>${viewingInvoice.paidAmount.toFixed(2)}</span>
+                    <span>${(viewingInvoice?.paidAmount || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-amber-600 font-bold">
                     <span>Outstanding</span>
-                    <span>${viewingInvoice.outstandingAmount.toFixed(2)}</span>
+                    <span>${(viewingInvoice?.outstandingAmount || 0).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -1465,7 +1464,7 @@ export default function BillingPage() {
                       <div key={payment.id} className="p-4">
                         <div className="flex justify-between items-start">
                           <div>
-                            <p className="font-medium text-green-600">${payment.amount.toFixed(2)}</p>
+                            <p className="font-medium text-green-600">${(payment.amount || 0).toFixed(2)}</p>
                             <p className="text-sm text-muted-foreground">{payment.method}</p>
                           </div>
                           <div className="text-right">
@@ -1497,7 +1496,7 @@ export default function BillingPage() {
             <DialogHeader>
               <DialogTitle>Record Payment</DialogTitle>
               <DialogDescription>
-                {selectedInvoiceForPayment?.invoiceNumber} - Outstanding: ${selectedInvoiceForPayment?.outstandingAmount.toFixed(2)}
+                {selectedInvoiceForPayment?.invoiceNumber} - Outstanding: ${(selectedInvoiceForPayment?.outstandingAmount || 0).toFixed(2)}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -1619,14 +1618,14 @@ export default function BillingPage() {
             <DialogHeader>
               <DialogTitle>Create Payment Plan</DialogTitle>
               <DialogDescription>
-                {selectedInvoiceForPlan?.patientName} - Outstanding: ${selectedInvoiceForPlan?.outstandingAmount.toFixed(2)}
+                {selectedInvoiceForPlan?.patientName} - Outstanding: ${(selectedInvoiceForPlan?.outstandingAmount || 0).toFixed(2)}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Number of Installments</Label>
                 <Select
-                  value={planForm.numberOfInstallments.toString()}
+                  value={(planForm.numberOfInstallments || 1).toString()}
                   onValueChange={(value) => setPlanForm(prev => ({ ...prev, numberOfInstallments: parseInt(value) }))}
                 >
                   <SelectTrigger>
@@ -1649,7 +1648,7 @@ export default function BillingPage() {
               </div>
               <div className="bg-muted/30 p-4 rounded-lg">
                 <p className="text-sm text-muted-foreground">
-                  Each installment: ${(selectedInvoiceForPlan ? selectedInvoiceForPlan.outstandingAmount / planForm.numberOfInstallments : 0).toFixed(2)}
+                  Each installment: ${((selectedInvoiceForPlan ? (selectedInvoiceForPlan.outstandingAmount || 0) / planForm.numberOfInstallments : 0) || 0).toFixed(2)}
                 </p>
               </div>
             </div>
@@ -1687,12 +1686,12 @@ export default function BillingPage() {
                   </div>
                   <div>
                     <Label className="text-muted-foreground text-xs">Claim Amount</Label>
-                    <p className="font-medium">${viewingClaim.claimAmount.toFixed(2)}</p>
+                    <p className="font-medium">${(viewingClaim?.claimAmount || 0).toFixed(2)}</p>
                   </div>
                   <div>
                     <Label className="text-muted-foreground text-xs">Approved Amount</Label>
                     <p className="font-medium text-green-600">
-                      {viewingClaim.approvedAmount ? `$${viewingClaim.approvedAmount.toFixed(2)}` : 'Pending'}
+                      {viewingClaim?.approvedAmount ? `$${(viewingClaim.approvedAmount || 0).toFixed(2)}` : 'Pending'}
                     </p>
                   </div>
                   <div>
@@ -1732,7 +1731,7 @@ export default function BillingPage() {
                   </div>
                   <div>
                     <Label className="text-muted-foreground text-xs">Total Amount</Label>
-                    <p className="font-medium">${viewingPlan.totalAmount.toFixed(2)}</p>
+                    <p className="font-medium">${(viewingPlan?.totalAmount || 0).toFixed(2)}</p>
                   </div>
                   <div>
                     <Label className="text-muted-foreground text-xs">Status</Label>
@@ -1757,7 +1756,7 @@ export default function BillingPage() {
                           <p className="text-xs text-muted-foreground">Due: {installment.dueDate}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">${installment.amount.toFixed(2)}</p>
+                          <p className="font-medium">${(installment.amount || 0).toFixed(2)}</p>
                           <Badge variant={
                             installment.status === 'Paid' ? 'success' :
                             installment.status === 'Overdue' ? 'destructive' : 'warning'

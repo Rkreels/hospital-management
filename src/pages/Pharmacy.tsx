@@ -147,23 +147,23 @@ export default function PharmacyPage() {
   };
 
   // Calculated values
-  const lowStockMedications = medications.filter(m => m.stock <= m.reorderLevel);
-  const expiringMedications = medications.filter(m => {
-    const expiry = new Date(m.expiryDate);
+  const lowStockMedications = (medications || []).filter(m => (m.stock || 0) <= (m.reorderLevel || 0));
+  const expiringMedications = (medications || []).filter(m => {
+    const expiry = new Date(m.expiryDate || '');
     const ninetyDaysFromNow = new Date();
     ninetyDaysFromNow.setDate(ninetyDaysFromNow.getDate() + 90);
     return expiry <= ninetyDaysFromNow;
   });
-  const expiredMedications = medications.filter(m => new Date(m.expiryDate) < new Date());
-  const pendingPrescriptions = prescriptions.filter(p => p.status === "Pending");
+  const expiredMedications = (medications || []).filter(m => new Date(m.expiryDate) < new Date());
+  const pendingPrescriptions = (prescriptions || []).filter(p => p.status === "Pending");
   // Calculate inventory value for potential reporting
-  const _totalInventoryValue = medications.reduce((sum, m) => sum + (m.price * m.stock), 0);
+  const _totalInventoryValue = (medications || []).reduce((sum, m) => sum + ((m.price || 0) * (m.stock || 0)), 0);
 
   // Filter and sort medications
-  const filteredMedications = medications
+  const filteredMedications = (medications || [])
     .filter(m => {
       const matchesSearch = 
-        m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (m.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         m.genericName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         m.category.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = categoryFilter === "all" || m.category === categoryFilter;
@@ -405,11 +405,11 @@ export default function PharmacyPage() {
       form: medication.form,
       strength: medication.strength,
       unit: medication.unit,
-      stock: medication.stock.toString(),
-      minStock: medication.minStock.toString(),
-      reorderLevel: medication.reorderLevel.toString(),
+      stock: (medication.stock || 0).toString(),
+      minStock: (medication.minStock || 0).toString(),
+      reorderLevel: (medication.reorderLevel || 0).toString(),
       manufacturer: medication.manufacturer,
-      price: medication.price.toString(),
+      price: (medication.price || 0).toString(),
       costPrice: medication.costPrice?.toString() || "",
       expiryDate: medication.expiryDate,
       batchNumber: medication.batchNumber || "",

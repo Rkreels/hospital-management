@@ -54,24 +54,24 @@ export default function DashboardPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const dashboardStats = db.getDashboardStats();
-        const appointments = db.getAppointments().slice(0, 5);
+        const dashboardStats = db.getDashboardStats() || {};
+        const appointments = (db.getAppointments() || []).slice(0, 5);
         const activities = [
-          ...db.getAdmissions().slice(0, 2).map(a => ({
+          ...(db.getAdmissions() || []).slice(0, 2).map(a => ({
             id: a.id,
             type: 'admission',
             title: `New admission: ${a.patientName}`,
             department: a.department,
             timestamp: a.admissionDate
           })),
-          ...db.getEmergencyCases().slice(0, 2).map(e => ({
+          ...(db.getEmergencyCases() || []).slice(0, 2).map(e => ({
             id: e.id,
             type: 'emergency',
             title: `Emergency case: ${e.caseType}`,
             department: e.department,
             timestamp: e.timestamp
           })),
-          ...db.getLabResults().slice(0, 1).map(l => ({
+          ...(db.getLabResults() || []).slice(0, 1).map(l => ({
             id: l.id,
             type: 'lab',
             title: `Lab result: ${l.testName}`,
