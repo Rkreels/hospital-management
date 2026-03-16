@@ -55,20 +55,36 @@ export default function DashboardPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [statsRes, activityRes, appointmentsRes] = await Promise.all([
-          fetch("/api/dashboard"),
-          fetch("/api/activity"),
-          fetch("/api/appointments?limit=5"),
-        ]);
+        const dashboardStats = db.getDashboardStats();
+        const appointments = db.getAppointments().slice(0, 5);
+        const activities = [
+          ...db.getAdmissions().slice(0, 2).map(a => ({
+            id: a.id,
+            type: 'admission',
+            title: `New admission: ${a.patientName}`,
+            department: a.department,
+            timestamp: a.admissionDate
+          })),
+          ...db.getEmergencyCases().slice(0, 2).map(e => ({
+            id: e.id,
+            type: 'emergency',
+            title: `Emergency case: ${e.caseType}`,
+            department: e.department,
+            timestamp: e.timestamp
+          })),
+          ...db.getLabResults().slice(0, 1).map(l => ({
+            id: l.id,
+            type: 'lab',
+            title: `Lab result: ${l.testName}`,
+            department: 'Laboratory',
+            timestamp: l.timestamp
+          }))
+        ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
         
-        const statsData = await statsRes;
-        const activityData = await activityRes;
-        const appointmentsData = await appointmentsRes;
-        
-        setStats(statsData);
-        setRecentActivity(activityData || []);
-        setUpcomingAppointments(appointmentsData || []);
-      } catch {
+        setStats(dashboardStats);
+        setRecentActivity(activities);
+        setUpcomingAppointments(appointments);
+      } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
       } finally {
         setLoading(false);
