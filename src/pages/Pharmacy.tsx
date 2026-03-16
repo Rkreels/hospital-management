@@ -130,7 +130,7 @@ export default function PharmacyPage() {
 
   const fetchMedications = async () => {
     try {
-      const data = db.getPharmacy();
+      const data = db.getMedications();
       setMedications(data);
     } catch {
       toast.error("Failed to fetch medications");
@@ -139,7 +139,7 @@ export default function PharmacyPage() {
 
   const fetchPrescriptions = async () => {
     try {
-      const data = db.getPrescription();
+      const data = db.getPrescriptions();
       setPrescriptions(data);
     } catch {
       toast.error("Failed to fetch prescriptions");

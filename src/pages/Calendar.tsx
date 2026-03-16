@@ -73,7 +73,7 @@ export default function CalendarPage() {
 
   const fetchEvents = async () => {
     try {
-      const data = db.getEvent();
+      const data = db.getEvents();
       setEvents(data);
     } catch {
       toast.error("Failed to fetch events");

@@ -137,7 +137,7 @@ export default function PrescriptionsPage() {
 
   const fetchPrescriptions = async () => {
     try {
-      const data = db.getPrescription();
+      const data = db.getPrescriptions();
       setPrescriptions(data);
     } catch {
       toast.error("Failed to fetch prescriptions");
@@ -146,7 +146,7 @@ export default function PrescriptionsPage() {
 
   const fetchPatients = async () => {
     try {
-      const data = db.getPatient();
+      const data = db.getPatients();
       setPatients(data.slice(0, 100));
     } catch {
       // Silent fail
@@ -155,7 +155,7 @@ export default function PrescriptionsPage() {
 
   const fetchMedications = async () => {
     try {
-      const data = db.getPharmacy();
+      const data = db.getMedications();
       setMedications(data.filter((m: Medication) => m.stock > 0));
     } catch {
       // Silent fail

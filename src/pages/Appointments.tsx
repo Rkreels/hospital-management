@@ -214,7 +214,7 @@ export default function AppointmentsPage() {
 
   const fetchAppointments = async () => {
     try {
-      const data = db.getAppointment();
+      const data = db.getAppointments();
       setAppointments(data);
     } catch {
       toast.error("Failed to fetch appointments");
@@ -223,7 +223,7 @@ export default function AppointmentsPage() {
 
   const fetchPatients = async () => {
     try {
-      const data = db.getPatient();
+      const data = db.getPatients();
       setPatients(data);
     } catch {
       toast.error("Failed to fetch patients");
@@ -232,7 +232,7 @@ export default function AppointmentsPage() {
 
   const fetchDoctors = async () => {
     try {
-      const data = db.getDoctor();
+      const data = db.getDoctors();
       setDoctors(data);
     } catch {
       toast.error("Failed to fetch doctors");
@@ -241,7 +241,7 @@ export default function AppointmentsPage() {
 
   const fetchDepartments = async () => {
     try {
-      const data = db.getDepartment();
+      const data = db.getDepartments();
       setDepartments(data);
     } catch {
       toast.error("Failed to fetch departments");

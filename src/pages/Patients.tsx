@@ -201,7 +201,7 @@ export default function PatientsPage() {
   const fetchPatients = async () => {
     setIsLoading(true);
     try {
-      const data = db.getPatient();
+      const data = db.getPatients();
       setPatients(data);
       setFilteredPatients(data);
     } catch {
@@ -495,18 +495,21 @@ export default function PatientsPage() {
 
   // Get unique wards for filter
   const wards = useMemo(() => {
+    if (!patients || !Array.isArray(patients)) return [];
     const uniqueWards = [...new Set(patients.map(p => p.ward).filter(Boolean))];
     return uniqueWards.sort();
   }, [patients]);
 
   // Statistics
-  const stats = useMemo(() => ({
-    total: patients.length,
-    critical: patients.filter(p => p.status === "Critical").length,
-    stable: patients.filter(p => p.status === "Stable").length,
-    recovering: patients.filter(p => p.status === "Recovering").length,
-    observation: patients.filter(p => p.status === "Under Observation").length,
-  }), [patients]);
+  const stats = useMemo(() => {
+    const patientList = patients || [];
+    return ({
+    total: patientList.length,
+    critical: patientList.filter(p => p.status === "Critical").length,
+    stable: patientList.filter(p => p.status === "Stable").length,
+    recovering: patientList.filter(p => p.status === "Recovering").length,
+    observation: patientList.filter(p => p.status === "Under Observation").length,
+  })}, [patients]);
 
   // Calculate age from DOB
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -28,7 +28,7 @@ export default function AdmissionsPage() {
 
   const fetchAdmissions = async () => {
     try {
-      const data = db.getAdmission();
+      const data = db.getAdmissions();
       setAdmissions(data);
     } catch {
       console.error("Failed to fetch admissions");

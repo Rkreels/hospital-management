@@ -26,7 +26,7 @@ export default function DepartmentsPage() {
 
   const fetchDepartments = async () => {
     try {
-      const data = db.getDepartment();
+      const data = db.getDepartments();
       setDepartments(data);
     } catch {
       console.error("Failed to fetch departments");

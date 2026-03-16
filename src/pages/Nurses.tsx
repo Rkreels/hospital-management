@@ -102,7 +102,7 @@ export default function NursesPage() {
   const fetchNurses = async () => {
     setIsLoading(true);
     try {
-      const data = db.getNurse();
+      const data = db.getNurses();
       setNurses(data);
     } catch {
       toast.error("Failed to fetch nurses");
